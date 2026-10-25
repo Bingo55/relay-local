@@ -1,0 +1,61 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first control room for CLI coding agents and API models",
+  "license": "MIT",
+  "author": "Relay contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nepoleon/relay-local.git"
+  },
+  "homepage": "https://github.com/Nepoleon/relay-local#readme",
+  "bugs": {
+    "url": "https://github.com/Nepoleon/relay-local/issues"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "cli",
+    "orchestration",
+    "local-first",
+    "developer-tools"
+  ],
+  "bin": {
+    "relay": "cli.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "files": [
+    "agents.json",
+    "CLI.md",
+    "cli.mjs",
+    "server.mjs",
+    "mcp.mjs",
+    "probe.mjs",
+    "smoke.mjs",
+    "presets.json",
+    "quota.ps1",
+    "relay.cmd",
+    "lib/",
+    "public/index.html",
+    "router/"
+  ],
+  "scripts": {
+    "start": "node server.mjs",
+    "probe": "node probe.mjs",
+    "doctor": "node probe.mjs",
+    "mcp": "node mcp.mjs",
+    "smoke": "node smoke.mjs",
+    "cli": "node cli.mjs",
+    "test": "node lib/cli/selftest.mjs",
+    "cli:test": "node lib/cli/selftest.mjs",
+    "site:dev": "npm --prefix site run dev",
+    "site:build": "npm --prefix site run build"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.6"
+  }
+}

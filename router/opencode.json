@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "relay-router": {
+      "description": "Relay's JSON-only dispatcher. No repository access.",
+      "mode": "primary",
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "prompt": "You are Relay's dispatcher. Never call tools, read files, or inspect a repository. Return only the JSON object the user asks for. Never mention absolute paths or the router's working directory; executing agents run in a separate workspace."
+    }
+  }
+}

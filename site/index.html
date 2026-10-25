@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script>
+      (function () {
+        try {
+          document.documentElement.dataset.motion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+          ).matches
+            ? 'off'
+            : 'on'
+        } catch (error) {
+          document.documentElement.dataset.motion = 'off'
+        }
+      })()
+    </script>
+
+    <title>Relay — Local-first agent orchestration</title>
+    <meta
+      name="description"
+      content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
+    />
+    <meta name="theme-color" content="#07080A" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+
+    <link rel="canonical" href="https://nepoleon.github.io/relay-local/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Relay" />
+    <meta property="og:title" content="Relay — Local-first agent orchestration" />
+    <meta
+      property="og:description"
+      content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
+    />
+    <meta property="og:url" content="https://nepoleon.github.io/relay-local/" />
+    <meta property="og:image" content="https://nepoleon.github.io/relay-local/images/og-cover.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Long-exposure light trails on a city road at night." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Relay — Local-first agent orchestration" />
+    <meta
+      name="twitter:description"
+      content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
+    />
+    <meta name="twitter:image" content="https://nepoleon.github.io/relay-local/images/og-cover.jpg" />
+    <meta name="twitter:image:alt" content="Long-exposure light trails on a city road at night." />
+
+    <style>
+      @font-face {
+        font-family: 'Instrument Serif';
+        src: url('%BASE_URL%fonts/instrument-serif.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('%BASE_URL%fonts/inter.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        src: url('%BASE_URL%fonts/jetbrains-mono.woff2') format('woff2');
+        font-weight: 100 800;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
+
+    <link
+      rel="preload"
+      href="%BASE_URL%fonts/instrument-serif.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="%BASE_URL%fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="%BASE_URL%fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
+
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="%BASE_URL%images/hero-workspace-1200.avif"
+      imagesrcset="%BASE_URL%images/hero-workspace-800.avif 800w, %BASE_URL%images/hero-workspace-1200.avif 1200w, %BASE_URL%images/hero-workspace-1600.avif 1600w"
+      imagesizes="100vw"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

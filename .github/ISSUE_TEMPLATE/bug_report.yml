@@ -1,0 +1,65 @@
+name: Bug report
+description: Report a reproducible problem with Relay
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Do not paste API keys, tokens, or full session files.
+        Security issues should go through SECURITY.md, not this form.
+  - type: input
+    id: version
+    attributes:
+      label: Relay version
+      description: Output of `node cli.mjs --version` or the commit hash.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, and the agent CLI or provider involved.
+      placeholder: Windows 11, Node 24.16.0, claude
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence that shows the problem.
+      placeholder: |
+        1. Start Relay with `npm start`
+        2. Open ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error text, not an API key.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove secrets before pasting. `probe-report.json` is ignored by git.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed API keys and other secrets from this report.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

@@ -1,0 +1,17 @@
+node_modules/
+sessions/
+scratch/
+probe-report.json
+agy-raw.json
+*.log
+*.tgz
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+coverage/

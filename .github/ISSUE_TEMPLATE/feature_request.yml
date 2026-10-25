@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest a focused improvement for Relay
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Relay is intentionally small and local-first. Describe the problem before
+        the solution, and keep the scope narrow.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that Relay makes difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Browser UI
+        - Terminal client
+        - Agent routing
+        - Provider catalog
+        - Sessions and context
+        - MCP bridge
+        - Marketing site
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This does not require Relay to become a hosted or public service.
+          required: true
+        - label: I searched existing issues first.
+          required: true

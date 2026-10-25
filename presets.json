@@ -1,0 +1,80 @@
+{
+  "Build + review": {
+    "note": "implement, then an independent review of the diff",
+    "steps": [
+      {
+        "agent": "build",
+        "why": "implement the task",
+        "prompt": "Implement this task in the current repository, including tests:\n{{task}}\nRun the tests you add. Report files changed and commands run."
+      },
+      {
+        "agent": "review",
+        "why": "independent review",
+        "prompt": "Review the previous agent's work against the original task. Read the changed files and the diff. List concrete bugs with file:line, then a verdict."
+      }
+    ]
+  },
+  "Second opinion": {
+    "note": "the same question to two agents, at the same time",
+    "steps": [
+      {
+        "agents": [
+          "qoder",
+          "agy"
+        ],
+        "why": "independent answers",
+        "prompt": "Answer this task independently and directly:\n{{task}}\nGive a recommendation and the trade-offs."
+      }
+    ]
+  },
+  "Research + plan": {
+    "note": "gather evidence first, then turn it into an ordered plan",
+    "steps": [
+      {
+        "agent": "research",
+        "why": "find the facts in the repo",
+        "prompt": "Research the codebase and constraints for:\n{{task}}\nReturn findings with file references."
+      },
+      {
+        "agent": "plan",
+        "why": "turn findings into steps",
+        "prompt": "Turn the previous research into an ordered implementation plan with risks and verification steps."
+      }
+    ]
+  },
+  "Quick reply": {
+    "note": "quick reply — greeting, no planning or tools",
+    "steps": [
+      {
+        "agent": "agy-flash",
+        "prompt": "Reply to the user's greeting in one or two natural sentences. Ignore any prior project context. Do not use tools, read files, or run commands.",
+        "why": "conversational message"
+      }
+    ]
+  },
+  "Website build": {
+    "note": "Research the two reference sites for real animation/visual patterns, plan a non-slop motion-rich landing build, implement it, then review for quality and AI-slop.",
+    "steps": [
+      {
+        "agent": "research",
+        "prompt": "Open and actually look at reactbits.dev and motionsites.ai (use vision/screenshots, not just text). Extract concrete, reusable patterns: the specific animation primitives and transition ideas reactbits offers (e.g. split-text, blur/scale reveals, magnetic buttons, spotlight/gradient borders, scroll-linked motion, spring easings), and from motionsites.ai the overall visual direction (bold type, dark or high-contrast palettes, generous whitespace, cinematic section reveals, kinetic hero). Deliver a short catalog: (1) 6-10 named motion techniques each with how it feels and a one-line implementation approach, (2) a visual style guide (typography, color, spacing, layout rhythm), (3) a list of what 'AI slop' looks like so we can avoid it (default gradients, centered generic hero, emoji, glassy cards everywhere, stock copy). Be specific and opinionated.",
+        "why": "vision-capable pass over the reference sites to capture concrete animation/transition techniques and the visual language, so the build copies real craft instead of guessing"
+      },
+      {
+        "agent": "plan",
+        "prompt": "Using the research catalog from the previous agent, write a tight build plan for one promotional landing page that advertises the target website. Define: tech stack (prefer HTML/CSS/vanilla or a lightweight framework with a motion library like GSAP/Framer-style spring easing — pick what installs cleanly and reads as non-AI), section list (hero, value prop, features/showcase, social-proof/CTA, footer), the exact motion treatment per section mapped to the researched techniques, the type/color/layout system from the style guide, and an explicit 'anti-slop' checklist to enforce. Output file structure and the order of implementation. No code yet.",
+        "why": "turn the research catalog into a single coherent, buildable site architecture before touching code"
+      },
+      {
+        "agent": "qoder",
+        "prompt": "Implement the site exactly per the previous agent's plan and the research techniques. Requirements: high-craft scroll and entrance transitions, spring-based easing (no linear/janky default tweens), a distinctive hero with kinetic type or reveal, cohesive dark/high-contrast visual language, real intentional copy (no filler), reduced-motion accessibility, responsive layout, and clean hand-written CSS. Avoid every item on the anti-slop checklist. Keep dependencies minimal and the project runnable. Deliver the full working files.",
+        "why": "implement the animated landing site from the approved plan"
+      },
+      {
+        "agent": "agy-flash",
+        "prompt": "Adversarially review the previous agent's output as a demanding design + code reviewer. Check: do the transitions actually feel premium and intentional (easing, timing, stagger) or are they default/cheap? Is any AI-slop present (generic hero, stock copy, lazy gradients, emoji, cookie-cutter cards)? Are motion, accessibility (prefers-reduced-motion), responsiveness, and the visual system consistent? Does it clearly advertise the target website? List concrete, prioritized fixes and rewrite any weak copy or motion. Confirm the project builds/runs.",
+        "why": "catch AI-slop, weak transitions, and correctness gaps in the built site before shipping"
+      }
+    ]
+  }
+}

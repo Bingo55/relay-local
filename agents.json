@@ -1,0 +1,315 @@
+{
+  "port": 7777,
+  "defaultInstructor": "opencode",
+  "defaultPlanner": "opencode-build",
+  "fallbacks": [
+    {
+      "agent": "opencode-build",
+      "model": "opencode/deepseek-v4.1-flash-free"
+    },
+    {
+      "agent": "kilo",
+      "model": "kilo/kilo-auto/free"
+    }
+  ],
+  "roles": {
+    "chat": [
+      "agy-flash",
+      "kilo",
+      "qoder"
+    ],
+    "plan": [
+      "opencode-build",
+      "agy",
+      "qoder"
+    ],
+    "build": [
+      "opencode-build",
+      "agy-flash",
+      "kilo",
+      "qoder",
+      "kiro",
+      "claude",
+      "codex",
+      "cline"
+    ],
+    "review": [
+      "opencode-build",
+      "agy",
+      "codex",
+      "qoder"
+    ],
+    "research": [
+      "agy-flash",
+      "gemini",
+      "qoder"
+    ]
+  },
+  "agents": [
+    {
+      "id": "qoder",
+      "label": "Qoder",
+      "cmd": "qoder",
+      "args": [
+        "-p",
+        "-o",
+        "text",
+        "--permission-mode",
+        "bypass_permissions"
+      ],
+      "delivery": "stdin",
+      "caps": "strong planner and large-refactor agent; Claude-class models; limited quota — prefer opencode-build for routine work",
+      "defaultFor": [],
+      "timeoutMin": 30
+    },
+    {
+      "id": "agy",
+      "label": "Antigravity · Sonnet",
+      "cmd": "agy",
+      "args": [
+        "--model",
+        "claude-sonnet-4-6",
+        "--output-format",
+        "json",
+        "--print-timeout",
+        "30m",
+        "--mode",
+        "accept-edits",
+        "--dangerously-skip-permissions",
+        "-p"
+      ],
+      "delivery": "arg",
+      "parse": "json:response",
+      "model": "claude-sonnet-4-6",
+      "modelArg": "--model",
+      "models": [
+        "claude-opus-4-6-thinking",
+        "claude-sonnet-4-6",
+        "gemini-3.8-flash-high",
+        "gpt-oss-120b-medium"
+      ],
+      "caps": "hardest reasoning and code review; Sonnet 4.6 behind the Antigravity CLI",
+      "defaultFor": [
+        "review"
+      ],
+      "timeoutMin": 32
+    },
+    {
+      "id": "agy-flash",
+      "label": "Antigravity · Gemini",
+      "cmd": "agy",
+      "args": [
+        "--model",
+        "gemini-3.8-flash-high",
+        "--output-format",
+        "json",
+        "--print-timeout",
+        "30m",
+        "--mode",
+        "accept-edits",
+        "--dangerously-skip-permissions",
+        "-p"
+      ],
+      "delivery": "arg",
+      "parse": "json:response",
+      "model": "gemini-3.8-flash-high",
+      "caps": "fast, cheap volume work; large context; good for research and first drafts",
+      "defaultFor": [
+        "research"
+      ],
+      "timeoutMin": 32
+    },
+    {
+      "id": "kilo",
+      "label": "Kilo",
+      "cmd": "kilo",
+      "args": [
+        "run",
+        "--auto",
+        "-m",
+        "kilo/kilo-auto/free"
+      ],
+      "delivery": "stdin",
+      "model": "kilo/kilo-auto/free",
+      "modelArg": "-m",
+      "models": [
+        "kilo/kilo-auto/free",
+        "kilo/minimax/minimax-m3.1-flash:free",
+        "kilo/nvidia/nemotron-3-ultra-550b-a55b:free",
+        "kilo/nvidia/nemotron-3-super-120b-a12b:free",
+        "kilo/nvidia/nemotron-3.5-lightning:free",
+        "kilo/nvidia/nemotron-3.5-super-vl:free",
+        "kilo/cohere/north-mini-code:free",
+        "kilo/thinkingmachines/inkling-small:free",
+        "kilo/xingchen-agi/xing4.0-29b-a4b:free",
+        "kilo/poolside/laguna-s-2.1:free",
+        "kilo/poolside/laguna-xs-2.1:free",
+        "kilo/reflection/beam-free",
+        "kilo/stealth/glyph-cluster",
+        "kilo/openrouter/free",
+        "kilo/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
+      ],
+      "caps": "opencode-derived agent with free-tier routing; generalist",
+      "defaultFor": [],
+      "timeoutMin": 30
+    },
+    {
+      "id": "opencode-build",
+      "label": "opencode · build",
+      "cmd": "opencode",
+      "args": [
+        "run",
+        "--agent",
+        "build",
+        "--auto",
+        "--model",
+        "opencode/deepseek-v4.1-flash-free"
+      ],
+      "delivery": "stdin",
+      "model": "opencode/deepseek-v4.1-flash-free",
+      "modelArg": "--model",
+      "models": [
+        "opencode/deepseek-v4.1-flash-free",
+        "opencode/minimax-m3.1-flash-free",
+        "opencode/glm-5.3-flash-free",
+        "opencode/mimo-v2.6-flash-free",
+        "opencode/longcat-2.5-preview-free",
+        "opencode/beam-free",
+        "opencode/nemotron-3-ultra-free",
+        "opencode/nemotron-3.5-lightning-free",
+        "opencode/nemotron-3.5-super-vl-free"
+      ],
+      "caps": "opencode's build loop on a choice of free models; edits code and runs tools",
+      "defaultFor": [],
+      "timeoutMin": 30
+    },
+    {
+      "id": "kiro",
+      "label": "Kiro CLI",
+      "cmd": "kiro-cli",
+      "args": [
+        "chat",
+        "--no-interactive",
+        "--trust-all-tools",
+        "--model",
+        "auto"
+      ],
+      "delivery": "stdin",
+      "model": "auto",
+      "modelArg": "--model",
+      "models": [
+        "auto",
+        "claude-sonnet-4.5",
+        "claude-haiku-4.5",
+        "deepseek-3.2",
+        "minimax-m2.5",
+        "minimax-m2.1",
+        "glm-5",
+        "qwen3-coder-next"
+      ],
+      "caps": "Kiro's agent loop with Auto, Claude, DeepSeek, MiniMax, GLM and Qwen; uses Kiro credits",
+      "defaultFor": [],
+      "timeoutMin": 30
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini CLI",
+      "cmd": "gemini",
+      "args": [
+        "--skip-trust",
+        "-p"
+      ],
+      "delivery": "arg",
+      "caps": "very large context; research and reading many files at once",
+      "defaultFor": [
+        "research"
+      ],
+      "timeoutMin": 30,
+      "note": "Requires the Gemini CLI to be installed and signed in (`gemini` once, or set GEMINI_API_KEY)."
+    },
+    {
+      "id": "claude",
+      "label": "Claude Code",
+      "cmd": "claude",
+      "args": [
+        "-p",
+        "--output-format",
+        "json"
+      ],
+      "delivery": "stdin",
+      "parse": "json:result",
+      "resume": {
+        "resumeFlag": "--resume",
+        "idFrom": "session_id"
+      },
+      "caps": "careful implementation and refactors inside a git repo",
+      "defaultFor": [],
+      "timeoutMin": 30,
+      "note": "Requires Claude Code to be installed and signed in (`claude`, then `/login`)."
+    },
+    {
+      "id": "codex",
+      "label": "Codex · local Ollama",
+      "cmd": "codex",
+      "args": [
+        "exec",
+        "--oss",
+        "--local-provider",
+        "ollama",
+        "-m",
+        "qwen2.5-coder:3b",
+        "--skip-git-repo-check",
+        "-"
+      ],
+      "delivery": "stdin",
+      "model": "ollama/qwen2.5-coder:3b",
+      "caps": "OpenAI Codex agent loop on a local model; offline and private, but slow on CPU",
+      "defaultFor": [],
+      "timeoutMin": 20,
+      "note": "Requires Codex to be installed and authenticated with a chat-capable provider."
+    },
+    {
+      "id": "nvidia",
+      "label": "NVIDIA NIM · Kilo",
+      "cmd": "kilo",
+      "args": [
+        "run",
+        "-m",
+        "nvidia/deepseek-ai/deepseek-v4.1-flash"
+      ],
+      "delivery": "arg",
+      "model": "nvidia/deepseek-ai/deepseek-v4.1-flash",
+      "modelArg": "-m",
+      "models": [
+        "nvidia/deepseek-ai/deepseek-v4.1-flash",
+        "nvidia/nvidia/nemotron-3-super-120b-a12b",
+        "nvidia/nvidia/nemotron-3-ultra-550b-a55b",
+        "nvidia/nvidia/nemotron-3.5-lightning-30b-a3b",
+        "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b",
+        "nvidia/openai/gpt-oss-20b",
+        "nvidia/z-ai/glm-5.3-flash"
+      ],
+      "caps": "NVIDIA NIM models through Kilo's agent loop; waiting for an NVAPI key with inference access",
+      "defaultFor": [],
+      "timeoutMin": 30,
+      "disabled": true,
+      "note": "Disabled by default. Add a working NVIDIA API key to Kilo's config, then remove `disabled`."
+    },
+    {
+      "id": "cline",
+      "label": "Cline",
+      "cmd": "cline",
+      "args": [
+        "--json"
+      ],
+      "delivery": "arg",
+      "caps": "end-to-end implementation with its own tool loop",
+      "defaultFor": [
+        "build"
+      ],
+      "timeoutMin": 30,
+      "disabled": true,
+      "note": "Disabled by default. Install Cline, run `cline auth`, then remove `disabled`."
+    }
+  ]
+}

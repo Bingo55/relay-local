@@ -1,0 +1,1736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>relay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --left:252px; --right:254px;
+    --bg:#0a0a0c; --panel:#101013; --panel2:#151519; --panel3:#1b1b20;
+    --line:#26262d; --line2:#373740;
+    --text:#e7e7ea; --silver:#d4d4d8; --mint:#c7d2fe; --muted:#8b8b95; --olive:#5d5d68;
+    --accent:#f59e0b; --accent-soft:rgba(245,158,11,.12);
+    --blue:#7aa2f7; --blue-soft:rgba(122,162,247,.1);
+    --green:#4ade80; --warn:#fbbf24; --bad:#f87171; --run:#7dd3fc;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;
+    background:var(--bg);color:var(--text);font:14px/1.55 var(--sans);
+    background-image:radial-gradient(800px 420px at 50% -18%,rgba(245,158,11,.06),transparent 70%);
+  }
+  body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,transparent 65%,rgba(0,0,0,.18))}
+  button{font:inherit;color:var(--silver);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;transition:border-color .15s,color .15s,background .15s,box-shadow .15s}
+  button:hover{border-color:var(--line2);color:#fff;background:var(--panel3);box-shadow:0 0 18px rgba(255,255,255,.035)}
+  button.primary{background:var(--accent-soft);border-color:rgba(245,158,11,.5);color:#ffe7bd;font-weight:600}
+  button.primary:hover{background:var(--accent);border-color:var(--accent);color:#1b1205;box-shadow:0 0 22px rgba(245,158,11,.22)}
+  button.danger:hover{color:#ffd0d0;border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.08);box-shadow:none}
+  button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+  input,select,textarea{font:inherit;color:var(--text);background:#0c0c0f;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus,textarea:focus{border-color:rgba(245,158,11,.6);box-shadow:0 0 0 3px rgba(245,158,11,.08)}
+  select{font-size:12px}
+  textarea{resize:vertical;font-family:var(--mono);font-size:12.5px;line-height:1.6}
+  ::placeholder{color:#55555f}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#2a2a32;border-radius:99px}
+  ::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+  .muted{color:var(--muted)}
+  .mono{font-family:var(--mono)}
+
+  header{position:relative;z-index:20;display:flex;align-items:center;gap:12px;height:54px;padding:0 16px;flex:none;background:rgba(12,12,15,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+  .brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;letter-spacing:.01em;color:#fff;white-space:nowrap}
+  .brand .mark{width:26px;height:26px;display:grid;place-items:center;border:1px solid rgba(245,158,11,.45);border-radius:7px;color:var(--accent);font-size:14px;background:rgba(245,158,11,.07)}
+  header .cwd{flex:1;min-width:100px;max-width:640px;font-family:var(--mono);font-size:11px;color:#a9a9b4;background:#0c0c0f;border-color:var(--line);border-radius:7px;padding:6px 10px;text-overflow:ellipsis}
+  .header-actions{display:flex;align-items:center;gap:7px}
+  .header-actions button{border-radius:999px;padding:5px 11px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+  #busy{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:#0d0d10;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  #busy::before{content:'';width:6px;height:6px;border-radius:50%;background:#4b4b55}
+  #busy.on{color:var(--green);border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.07)}
+  #busy.on::before{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.1s infinite}
+  #stop{border-radius:999px;padding:5px 12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:transparent;border-color:var(--line)}
+  #stop:hover{color:#ffd7d7;border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.08);box-shadow:none}
+  main{position:relative;z-index:1;display:grid;grid-template-columns:var(--left) minmax(0,1fr) var(--right);flex:1;min-height:0}
+  aside{background:#0d0d10;overflow:auto;padding:17px 13px;backdrop-filter:blur(8px)}
+  aside.left{border-right:1px solid var(--line)}
+  aside.right{border-left:1px solid var(--line)}
+  h3{display:flex;align-items:center;gap:7px;margin:0 0 11px;font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  h3::before{content:'';width:5px;height:5px;border-radius:1px;background:var(--accent);opacity:.85}
+
+  .agent{position:relative;display:flex;align-items:center;gap:10px;padding:7px 8px;border:1px solid transparent;border-radius:9px;transition:background .15s,border-color .15s}
+  .agent:hover{background:#141419;border-color:var(--line)}
+  .agent.off{opacity:.45}
+  .agent.off:hover{opacity:.62}
+  .avatar{position:relative;flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:9px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--av,#f59e0b);background:#121216;border:1px solid color-mix(in srgb,var(--av,#f59e0b) 34%,#26262d);box-shadow:inset 0 0 12px rgba(255,255,255,.015)}
+  .avatar.sm{width:24px;height:24px;font-size:10px;border-radius:7px}
+  .avatar .dot{position:absolute;right:-1px;bottom:-1px;width:8px;height:8px;border:2px solid #0d0d10;background:var(--green);box-shadow:0 0 7px rgba(74,222,128,.8)}
+  .agent.off .dot{background:#3b3b44;box-shadow:none}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3b3b44;flex:none}
+  .dot.running{background:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.15),0 0 10px var(--accent);animation:pulse 1.1s infinite}
+  .dot.cooling{background:var(--warn);box-shadow:0 0 8px rgba(251,191,36,.45)}
+  .dot.fail{background:var(--bad);box-shadow:0 0 8px rgba(248,113,113,.45)}
+  @keyframes pulse{50%{opacity:.3}}
+  .agent-meta{min-width:0;flex:1}
+  .agent-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--silver);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .agent small{display:block;color:var(--muted);font-family:var(--mono);font-size:9.5px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{font-family:var(--mono);font-size:8.5px;line-height:1.4;letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:rgba(255,255,255,.02)}
+  .agent.off .badge{color:#6b6b75;border-color:#33333b}
+
+  .roles{margin-top:24px;font-size:11px;color:var(--muted)}
+  .roles div{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.055)}
+  .roles div:last-child{border-bottom:none}
+  .roles b{color:var(--accent);font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+  .roles span{color:#8b8b95;font-family:var(--mono);font-size:9.5px;line-height:1.7;word-break:break-word}
+
+  .quota{margin-top:24px}
+  .quota .badge{margin-left:auto;font-size:8px;letter-spacing:.04em}
+  .quota-route{margin:0 0 10px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:#111115;font-family:var(--mono);font-size:9px;line-height:1.6;color:var(--muted)}
+  .quota-route b{font-weight:600}
+  .quota-route .qr-label{display:block;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--olive);margin-bottom:1px}
+  .qrow{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.055)}
+  .qrow:last-child{border-bottom:none}
+  .qrow-top{display:flex;align-items:baseline;gap:7px;font-family:var(--mono);font-size:9px}
+  .qname{min-width:0;flex:1;color:var(--silver);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qpct{color:var(--muted);flex:none}
+  .qcap{color:var(--olive);font-size:8px}
+  .qbar{height:4px;margin-top:4px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+  .qbar i{display:block;height:100%;border-radius:inherit;transition:width .35s}
+  .qbar i.q-green{background:var(--green);box-shadow:0 0 7px rgba(74,222,128,.5)}
+  .qbar i.q-orange{background:var(--warn);box-shadow:0 0 7px rgba(251,191,36,.45)}
+  .qbar i.q-red{background:var(--bad);box-shadow:0 0 7px rgba(248,113,113,.45)}
+  .qbar i.q-out{background:#fff;box-shadow:0 0 7px rgba(255,255,255,.5)}
+  .qbar i.q-unknown,.qbar i.q-off{background:#3b3b44}
+  .qrow-top .q-green{color:var(--green)} .qrow-top .q-orange{color:var(--warn)}
+  .qrow-top .q-red{color:var(--bad)} .qrow-top .q-out{color:#fff} .qrow-top .q-unknown,.qrow-top .q-off{color:var(--muted)}
+  .quota-set{float:right;margin-top:2px;padding:0;border:0;background:none;color:var(--olive);font-family:var(--mono);font-size:8px;line-height:1.4;box-shadow:none}
+  .quota-set:hover{color:var(--green);background:none;box-shadow:none}
+  .quota-legend{margin-top:8px;font-family:var(--mono);font-size:7.5px;line-height:1.7;color:var(--olive)}
+  .quota-note{font-size:10px;line-height:1.55;color:var(--muted);margin-bottom:12px}
+
+  #thread{overflow:auto;padding:26px clamp(20px,4vw,56px) 268px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  #thread>*{width:min(900px,100%);flex:none}
+  .empty{margin:auto;max-width:620px;padding:34px 28px;text-align:center;color:var(--muted)}
+  .empty-kicker{display:inline-block;margin-bottom:14px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);background:rgba(245,158,11,.05)}
+  .empty h1{color:#f4f4f5;font-size:clamp(24px,3vw,34px);letter-spacing:-.035em;margin:0 0 12px;line-height:1.15}
+  .empty p{margin:8px auto;max-width:520px;color:var(--muted);font-size:13px}
+  .empty code{color:#d8d8de;font-family:var(--mono);font-size:11px;background:#151519;border:1px solid var(--line);padding:1px 6px;border-radius:5px}
+  .starters{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:22px}
+  .starters button{font-size:11.5px;border-radius:999px;padding:6px 11px;color:#bdbdc7}
+
+  .msg{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:13px 15px}
+  .msg.user{align-self:stretch;background:#15161c;border-color:#303644;border-left:3px solid var(--blue);box-shadow:0 0 0 1px rgba(122,162,247,.04)}
+  .msg.user .who{color:#a8bcff}
+  .msg.user .body{font-size:13.5px;color:#e6e8f0}
+  .who{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .who .time{margin-left:auto;letter-spacing:.02em;color:#5f5f6a;text-transform:none}
+  .msg p{margin:0;white-space:pre-wrap}
+  .msg .body{white-space:pre-wrap;color:#d8d8de}
+  .notice{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.055);color:var(--warn);font-family:var(--mono);font-size:11px}
+
+  .plan{border-color:#2e2e36;background:linear-gradient(180deg,#121216,#0f0f13);border-left:3px solid var(--accent)}
+  .plan-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  .plan-head .badge{color:#d7d7de;border-color:var(--line)}
+  .plan-summary{color:#a0a0ab;font-size:12px;margin:6px 0 10px;line-height:1.6}
+  .plan-note{color:#a0a0ab;font-size:12px;margin-bottom:12px}
+  .plan-step{display:grid;grid-template-columns:168px minmax(0,1fr);gap:8px;margin-bottom:8px;align-items:start}
+  .plan-pick{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .plan-step select,.plan-step input{width:100%;font-size:11.5px}
+  .plan-step textarea{width:100%;min-height:74px;font-size:11.5px}
+  .plan-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .plan-actions button{border-radius:999px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+  .plan-actions .muted{font-size:11px}
+
+  .step{background:#101014}
+  .step .step-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .step .step-head b{font-weight:600;color:#f2f2f4;font-size:13px}
+  .step .step-head .model{font-family:var(--mono);font-size:10px;color:var(--muted);background:#16161b;border:1px solid var(--line);border-radius:999px;padding:1px 7px}
+  .step .status{padding:2px 8px;border:1px solid var(--line);border-radius:999px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:#0d0d10}
+  .status.done{color:var(--green);border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06)}
+  .status.running{color:var(--run);border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.06)}
+  .status.failed,.status.timeout,.status.quota,.status.stopped{color:var(--bad);border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.06)}
+  .step .step-head .time{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:#62626d}
+
+  .thinking{margin-top:11px;border:1px solid var(--line);border-radius:9px;background:#0d0d10;overflow:hidden}
+  .thinking>summary{display:flex;align-items:center;gap:8px;padding:8px 10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#777783;cursor:pointer;user-select:none;list-style:none}
+  .thinking>summary::-webkit-details-marker{display:none}
+  .thinking>summary::before{content:'▸';color:#62626d;transition:transform .15s;font-size:10px}
+  .thinking[open]>summary::before{transform:rotate(90deg)}
+  .thinking>summary:hover{color:#b9b9c3;background:#111116}
+  .thinking>summary .tsum{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none;letter-spacing:0;color:#666671;font-size:10px}
+  .thinking-body{padding:11px 12px 12px;border-top:1px solid var(--line);background:#0b0b0e}
+  .thinking-label{margin:9px 0 4px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#5f5f6a}
+  .thinking-label:first-child{margin-top:0}
+  .thinking-body .think-pre{margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#09090b;font-family:var(--mono);font-size:10.5px;line-height:1.65;color:#a7a7b3;white-space:pre-wrap;word-break:break-word;max-height:360px;overflow:auto}
+  .thinking-body .why{color:#8e8e9a;font-size:11.5px;line-height:1.65;margin:0 0 8px}
+  .fallback{color:var(--warn);font-family:var(--mono);font-size:10px;line-height:1.5;margin:0 0 8px}
+
+  .output-wrap{margin-top:12px}
+  .output-label{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#5f5f6a}
+  .output-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+  .step pre.out{margin:0;padding:12px 13px;background:#0a0a0d;border:1px solid #222229;border-radius:9px;font-family:var(--mono);font-size:11.8px;line-height:1.7;color:#cfd0d6;white-space:pre-wrap;word-break:break-word;max-height:620px;overflow:auto}
+  .step pre.out:empty::before{content:'working…';color:#5f5f6a}
+  .step footer{display:flex;gap:6px;margin-top:10px;opacity:.55;transition:opacity .15s}
+  .step:hover footer{opacity:1}
+  .step footer button{padding:3px 9px;border-radius:999px;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase}
+  .gitline{margin-top:9px;font-family:var(--mono);font-size:10px;color:var(--warn);white-space:pre-wrap}
+  .msg.btw{border-color:rgba(251,191,36,.28);background:#161308}
+  .msg.btw .badge{color:var(--warn);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
+  .msg.btw .btw-q{margin:8px 0 0;padding:8px 10px;border-left:2px solid rgba(251,191,36,.45);background:rgba(251,191,36,.04);border-radius:0 6px 6px 0;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--warn);white-space:pre-wrap;word-break:break-word}
+
+  #composer{position:fixed;left:calc(var(--left) + (100vw - var(--left) - var(--right))/2);transform:translateX(-50%);bottom:16px;z-index:30;width:min(820px,calc(100vw - var(--left) - var(--right) - 48px));padding:9px 12px 10px;border:1px solid #303039;border-radius:16px;background:rgba(15,15,19,.97);box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.02);backdrop-filter:blur(18px)}
+  .tabs{display:flex;align-items:center;gap:5px;margin-bottom:7px}
+  .tab{padding:4px 10px;border:1px solid transparent;border-radius:999px;background:transparent;color:#777782;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+  .tab:hover{color:#d4d4d8;border-color:var(--line);background:#131318;box-shadow:none}
+  .tab.on{color:#ffd79a;border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.1)}
+  .tabs .spacer{flex:1}
+  #instructorSel{max-width:150px;padding:4px 7px;border-radius:999px;font-family:var(--mono);font-size:9px}
+  .compose-row{display:flex;align-items:flex-end;gap:8px}
+  #input{flex:1;min-height:58px;max-height:220px;padding:10px 11px;background:transparent;border:0;border-radius:8px;font-family:var(--mono);font-size:12.5px;line-height:1.6;box-shadow:none}
+  #input:focus{box-shadow:none;border:0}
+  #send{border-radius:10px;padding:10px 18px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;margin-bottom:2px}
+  .composer-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px;padding-top:8px;border-top:1px solid var(--line)}
+  .meta-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:#111116;font-family:var(--mono);font-size:9px;color:#bdbdc7;box-shadow:none}
+  .meta-pill:hover{border-color:var(--line2);background:#16161b;box-shadow:none;color:#fff}
+  .meta-key{font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:#5f5f6a}
+  .meta-dim{color:#6f6f7a;font-size:8.5px}
+  .hint{flex:1;min-width:160px;text-align:right;font-family:var(--mono);font-size:8.5px;line-height:1.5;color:#51515b}
+  .hint code{color:#b8b8c3;font-family:var(--mono)}
+  body.busy #send{opacity:.5}
+
+  .slash-menu{position:absolute;left:12px;right:12px;bottom:calc(100% + 8px);z-index:36;max-height:240px;overflow:auto;padding:6px;border:1px solid var(--line2);border-radius:11px;background:#121216;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  .slash-menu[hidden]{display:none}
+  .slash-item{display:flex;align-items:baseline;gap:10px;width:100%;padding:7px 9px;border:1px solid transparent;border-radius:7px;background:transparent;text-align:left;box-shadow:none}
+  .slash-item:hover,.slash-item.on{background:#191920;border-color:var(--line);color:#f4f4f5;box-shadow:none}
+  .slash-item b{font-family:var(--mono);font-size:10.5px;color:#ffcf8a;white-space:nowrap}
+  .slash-item span{color:var(--muted);font-size:10.5px}
+  .slash-more{margin:4px 6px 2px;font-family:var(--mono);font-size:8.5px;color:#5f5f6a}
+
+  .model-pop{position:absolute;right:12px;bottom:calc(100% + 8px);z-index:37;width:320px;max-height:360px;overflow:auto;padding:7px;border:1px solid var(--line2);border-radius:11px;background:#121216;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  .model-pop[hidden]{display:none}
+  .mp-head{display:flex;align-items:baseline;justify-content:space-between;padding:5px 7px 8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#777782}
+  .model-item{display:flex;align-items:center;gap:9px;width:100%;padding:7px 8px;border:1px solid transparent;border-radius:7px;background:transparent;text-align:left;box-shadow:none}
+  .model-item:hover,.model-item.on{background:#191920;border-color:var(--line);box-shadow:none}
+  .model-item b{font-family:var(--mono);font-size:10.5px;color:#e4e4e8;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .model-item span{color:#6f6f7a;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .model-item .mi-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+  .model-item .mi-use{font-family:var(--mono);font-size:8px;color:#5f5f6a}
+  .model-all{margin-top:5px;width:100%;justify-content:center;font-family:var(--mono);font-size:9px;border-radius:7px}
+
+  #toast{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;flex-direction:column;gap:8px}
+  #toast div{max-width:380px;padding:9px 13px;border:1px solid var(--line2);border-left:3px solid var(--accent);border-radius:9px;background:#111115;color:#e6e6ea;font-family:var(--mono);font-size:10px;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+
+  .pinned-block{margin:0 0 20px}
+  #pinned .pin{margin-bottom:8px;padding:9px 10px;border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:7px;background:#111115;font-size:11px}
+  #pinned .pin b{display:block;margin-bottom:5px;font-family:var(--mono);font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:#bdbdc7}
+  #pinned .pin p{margin:0;max-height:70px;overflow:hidden;white-space:pre-wrap;color:#8b8b95;font-size:10.5px;line-height:1.6}
+
+  .session-tabs{position:relative;z-index:15;display:flex;align-items:center;gap:9px;height:43px;padding:0 14px;flex:none;background:rgba(11,11,14,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
+  .st-label{flex:none;font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#5d5d68}
+  #sessions{display:flex;align-items:center;gap:5px;flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  #sessions::-webkit-scrollbar{display:none}
+  .tab-sess-row{display:flex;align-items:center;gap:2px;flex:none;margin:0}
+  .sess{display:flex;align-items:center;gap:7px;width:auto;max-width:230px;margin:0;padding:6px 8px;overflow:hidden;text-align:left;white-space:nowrap;background:#111115;border:1px solid transparent;border-radius:7px;color:#94949e;font-size:11px;line-height:1.25}
+  .sess-title{max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sess-time{font-family:var(--mono);font-size:7.5px;letter-spacing:.04em;color:#5d5d68}
+  .sess:hover{background:#16161b;border-color:var(--line);color:#e4e4e8;box-shadow:none}
+  .sess.on{background:#1a1a20;border-color:#44444f;color:#f0f0f2;box-shadow:none}
+  .sess.on::before{content:'';flex:none;width:2px;height:12px;border-radius:2px;background:var(--accent)}
+  .sess.on .sess-time{color:#9a9aa5}
+  .sess.running{border-color:rgba(74,222,128,.22)}
+  .sess-run{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase}
+  .sess-run::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.1s infinite}
+  .sess-del{flex:none;width:22px;height:22px;padding:0;border-radius:6px;font-family:var(--mono);font-size:13px;line-height:1;color:#6f6f7a;background:transparent;border:1px solid transparent;box-shadow:none}
+  .sess-del:hover{color:#ff8f8f;border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.08);box-shadow:none}
+  .sess-del:disabled{opacity:.25;cursor:default;color:var(--muted)}
+  #newSession{flex:none;width:auto;margin:0;padding:6px 10px;border-radius:7px;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:#bdbdc7;background:#131318;border:1px solid var(--line)}
+  #newSession:hover{color:#f0f0f2;border-color:var(--line2);background:#18181e;box-shadow:none}
+
+  .sess-row{display:flex;align-items:stretch;gap:5px;margin-bottom:6px}
+  .sess-row .cmd-item{flex:1;min-width:0;width:auto;margin:0}
+
+  .usage-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .usage-card{min-width:0;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:#111115}
+  .usage-card b{display:block;margin-bottom:2px;font-family:var(--mono);font-size:14px;font-weight:500;line-height:1.15;color:#ededf1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .usage-card span{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:#656570}
+  .usage-models{margin-top:9px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.06)}
+  .usage-models-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:5px;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#656570}
+  .usage-model{display:flex;align-items:baseline;gap:6px;padding:3px 0;font-family:var(--mono);font-size:8.5px;color:#9b9ba6}
+  .usage-model span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .usage-model b{flex:none;color:#6f6f7a;font-weight:500}
+  .usage-empty{padding:6px 0;color:#656570;font-size:10px;line-height:1.5}
+  .usage-note{margin-top:9px;font-size:9.5px;line-height:1.5;color:#5d5d68}
+
+  .modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px)}
+  .modal[hidden]{display:none}
+  .modal-card{width:min(720px,100%);max-height:84vh;overflow:auto;padding:18px;border:1px solid var(--line2);border-radius:13px;background:#111115;box-shadow:0 24px 90px rgba(0,0,0,.7)}
+  .modal-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .modal-head h2{flex:1;margin:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#e7e7ea}
+  #modalClose{padding:2px 8px;border-radius:7px;font-family:var(--mono)}
+  .modal-note{padding:9px 11px;margin-bottom:13px;border:1px solid var(--line);border-radius:8px;background:#0d0d10;color:#8b8b95;font-size:11px;line-height:1.6}
+  .cmd-item{display:flex;align-items:baseline;gap:10px;width:100%;margin:3px 0;padding:8px 10px;text-align:left;border:1px solid transparent;border-radius:7px;background:#151519;box-shadow:none}
+  .cmd-item:hover{border-color:var(--line2);background:#1a1a20;color:#fff;box-shadow:none}
+  .cmd-item b{font-family:var(--mono);font-size:10.5px;color:#ffcf8a;white-space:nowrap}
+  .cmd-item span{color:var(--muted);font-size:10.5px;line-height:1.5}
+  .model-group{margin-top:15px}
+  .model-group h3{margin:0 0 7px}
+  .kv{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.06);font-size:11.5px}
+  .kv:last-child{border-bottom:none}
+  .kv b{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .kv span{color:#cfcfd6;word-break:break-word}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .form-grid label{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#787883}
+  .form-grid label.wide{grid-column:1/-1}
+  .form-grid input,.form-grid select,.form-grid textarea{font-family:var(--mono);font-size:10.5px}
+  .form-grid textarea{min-height:66px}
+  .conn-list,.mcp-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+  .conn-item,.mcp-item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#0f0f13}
+  .conn-item .ci-main,.mcp-item .ci-main{min-width:0;flex:1}
+  .conn-item b,.mcp-item b{display:block;font-size:11.5px;color:#eeeeF2;font-weight:600}
+  .conn-item small,.mcp-item small{display:block;margin-top:3px;color:#74747f;font-family:var(--mono);font-size:9px;line-height:1.55;word-break:break-word}
+  .row-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+  .row-actions button{padding:3px 8px;border-radius:999px;font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.05em}
+  .mcp-item.off{opacity:.55}
+  .empty-list{padding:10px;border:1px dashed var(--line);border-radius:8px;color:#6f6f7a;font-size:11px;margin-bottom:14px}
+  .subhead{display:flex;align-items:center;gap:8px;margin:18px 0 9px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#8b8b95}
+  .subhead::after{content:'';flex:1;height:1px;background:var(--line)}
+  .connect-search{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .connect-search input{flex:1;min-width:0;font-family:var(--mono);font-size:10.5px}
+  .connect-search span{flex:none;font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:#63636e}
+  .provider-grid,.custom-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+  .provider-card{display:flex;align-items:flex-start;gap:10px;min-width:0;padding:10px;text-align:left;border:1px solid var(--line);border-radius:9px;background:#0f0f13;box-shadow:none}
+  .provider-card:hover{border-color:color-mix(in srgb,hsl(var(--ph,38) 55% 55%) 48%,var(--line));background:#15151b;box-shadow:0 0 20px hsl(var(--ph,38) 55% 50% / .05)}
+  .provider-card.custom{--ph:38;border-style:dashed}
+  .provider-avatar{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:9px;font-family:var(--mono);font-size:10px;font-weight:600;color:hsl(var(--ph,38) 70% 72%);background:hsl(var(--ph,38) 60% 50% / .08);border:1px solid hsl(var(--ph,38) 50% 50% / .28)}
+  .provider-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .provider-info b{font-size:11.5px;line-height:1.35;color:#eeeef2;font-weight:600}
+  .provider-info b em{margin-left:3px;padding:0 4px;border:1px solid rgba(245,158,11,.25);border-radius:999px;color:#d6a55f;font-family:var(--mono);font-size:7px;font-style:normal;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+  .provider-info small{display:-webkit-box;overflow:hidden;font-size:10px;line-height:1.45;color:#7c7c87;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .provider-meta{font-family:var(--mono);font-size:8px;line-height:1.45;letter-spacing:.04em;text-transform:uppercase;color:#5f5f6b}
+  .provider-meta code{font-family:var(--mono);font-size:8px;text-transform:none;color:#8b8b95;background:none;padding:0}
+  .provider-empty{grid-column:1/-1;padding:14px;border:1px dashed var(--line);border-radius:8px;color:#6f6f7a;font-size:11px;line-height:1.6}
+  .provider-hero{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;background:#0f0f13}
+  .provider-hero-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .provider-hero-main b{font-size:15px;color:#fff;font-weight:600}
+  .provider-hero-main small{font-size:11px;line-height:1.45;color:var(--muted)}
+  .provider-hero-main .provider-meta{font-size:8.5px}
+  .key-field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#787883}
+  .key-field input{font-family:var(--mono);font-size:11px}
+  .connect-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .key-link{font-family:var(--mono);font-size:9px;color:#b8a888;text-decoration:none;border-bottom:1px dashed rgba(245,158,11,.3);padding-bottom:1px}
+  .key-link:hover{color:#ffd79b;border-bottom-color:var(--accent)}
+  .connect-fineprint{margin-top:10px;font-size:10px;line-height:1.55;color:#6f6f7a}
+  .connect-advanced{margin-top:12px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#0d0d10}
+  .connect-advanced summary{padding:9px 0;cursor:pointer;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#8b8b95}
+  .connect-advanced[open]{padding-bottom:10px}
+  .connect-advanced .form-grid{margin-bottom:0}
+  @media (max-width:720px){
+    .provider-grid,.custom-grid{grid-template-columns:1fr}
+  }
+
+  @media (max-width:1050px){
+    :root{--left:220px;--right:0px}
+    main{grid-template-columns:var(--left) minmax(0,1fr)}
+    aside.right{display:none}
+    #composer{width:min(820px,calc(100vw - var(--left) - 32px))}
+  }
+  @media (max-width:720px){
+    :root{--left:0px;--right:0px}
+    header{gap:8px;padding:0 10px}
+    header .cwd{max-width:none;min-width:0}
+    #busy{display:none}
+    .session-tabs{gap:6px;padding:0 8px}
+    .st-label{display:none}
+    .sess{max-width:190px}
+    .sess-title{max-width:128px}
+    .sess-time{display:none}
+    #newSession{padding:6px 8px;font-size:8px}
+    main{grid-template-columns:1fr}
+    aside.left{display:none}
+    #thread{padding:16px 14px 250px}
+    #composer{left:50%;bottom:10px;width:calc(100vw - 20px)}
+    .plan-step{grid-template-columns:1fr}
+    .tabs{flex-wrap:wrap}
+    #instructorSel{max-width:120px}
+    .hint{display:none}
+    .form-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="mark">◈</span><span>Relay</span></div>
+  <input class="cwd" id="cwd" spellcheck="false" title="working directory for every agent" />
+  <span id="busy">idle</span>
+  <div class="header-actions">
+    <button id="openConnect" title="Connect an API key and models">Connect</button>
+    <button id="openMcp" title="Manage MCP servers and plugins">MCP</button>
+    <button id="stop">Stop</button>
+  </div>
+</header>
+
+<nav class="session-tabs" aria-label="Chats">
+  <span class="st-label">chats</span>
+  <div id="sessions"></div>
+  <button id="newSession" title="New chat">+ new chat</button>
+</nav>
+
+<main>
+  <aside class="left">
+    <div class="pinned-block">
+      <h3>Pinned context</h3>
+      <div id="pinned"><span class="muted" style="font-size:11px">Pin a step output to include it in every later call.</span></div>
+    </div>
+    <h3>Agents</h3>
+    <div id="agents"></div>
+    <div class="roles" id="roles"></div>
+  </aside>
+
+  <section id="thread">
+    <div class="empty">
+      <div class="empty-kicker">relay / workspace</div>
+      <h1>What do you want to build?</h1>
+      <p>Plan it, code it, or fan it out to several agents. Relay keeps the plan and the reasoning out of the way until you ask for it.</p>
+      <p><code>Plan</code> writes a plan · <code>Code</code> plans and runs · <code>Orchestrate</code> sends parallel agents</p>
+      <div class="starters">
+        <button data-starter="Build a small REST API with tests">Build an API</button>
+        <button data-starter="Review the current project and find the riskiest bug">Review this project</button>
+        <button data-starter="Compare two implementation approaches and recommend the faster one">Compare approaches</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="right">
+    <h3>Usage</h3>
+    <div id="usageStats" class="usage-stats"></div>
+    <div class="quota" style="margin-top:18px">
+      <h3>Quota <span class="badge" id="quotaMode">local</span></h3>
+      <div id="quotaRoute" class="quota-route">reading meter...</div>
+      <div id="quota"></div>
+      <div class="quota-legend">green &lt;50 · orange 50–79 · red 80–94 · white 95+ / out</div>
+      <div class="quota-legend">local observed caps · provider dashboards win</div>
+    </div>
+    <div class="usage-note">Usage is observed locally. Provider dashboards are authoritative.</div>
+  </aside>
+</main>
+
+<div id="composer">
+  <div id="slashMenu" class="slash-menu" hidden></div>
+  <div id="modelPop" class="model-pop" hidden>
+    <div class="mp-head"><span>model</span><span>most used</span></div>
+    <div id="modelList"></div>
+    <button id="allModels" class="model-all">all models…</button>
+  </div>
+  <div class="tabs">
+    <button class="tab" data-mode="plan">Plan</button>
+    <button class="tab" data-mode="code">Code</button>
+    <button class="tab" data-mode="orchestrate">Orchestrate</button>
+    <span class="spacer"></span>
+    <select id="instructorSel" title="Instructor that turns your message into a plan"></select>
+  </div>
+  <div class="compose-row">
+    <textarea id="input" placeholder="Describe the job. Relay will choose the right mode and agents."></textarea>
+    <button class="primary" id="send">Code</button>
+  </div>
+  <div class="composer-meta">
+    <button id="modelBtn" class="meta-pill" title="Pick a model (/model)"><span class="meta-key">model</span><span id="currentModel">auto</span><span id="currentModelAgent" class="meta-dim"></span></button>
+    <span id="modeLabel" class="meta-dim"></span>
+    <span class="hint" id="hint">Enter sends · Shift+Enter newline · <code>/help</code> commands · Esc stops a run</span>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="modal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head"><h2 id="modalTitle"></h2><button id="modalClose" type="button">esc</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s)
+const esc = (s='') => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+const fmtDur = ms => ms == null ? '' : ms < 60000 ? (ms/1000).toFixed(0)+'s' : Math.floor(ms/60000)+'m'+String(Math.floor(ms%60000/1000)).padStart(2,'0')+'s'
+const stamp = iso => iso ? new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''
+const fmtWhen = iso => {
+  if (!iso) return ''
+  const d = new Date(iso), p = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}
+const fmtTabWhen = iso => {
+  if (!iso) return ''
+  const d = new Date(iso), now = new Date()
+  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString([], {month:'short', day:'numeric'})
+  return d.toLocaleDateString([], {year:'2-digit', month:'short', day:'numeric'})
+}
+const MODES = {
+  plan: {
+    label: 'Plan', button: 'Plan',
+    hint: 'Plan mode writes a plan and waits. Review or edit the steps, then click <code>Run plan</code>. <code>/model</code> changes models.',
+    placeholder: 'Describe what you want planned. Relay will map agents, steps, and risks.',
+  },
+  code: {
+    label: 'Code', button: 'Code',
+    hint: 'Code mode plans, routes, and runs automatically. Every step sees the earlier outputs. <code>/model</code> changes models.',
+    placeholder: 'Describe the task. Relay will plan it and hand each step to the best agent.',
+  },
+  orchestrate: {
+    label: 'Orchestrate', button: 'Orchestrate',
+    hint: 'Orchestrate fans out to several eligible agents in parallel, then merges their work. Least-used/quota-aware.',
+    placeholder: 'Describe the objective. Relay will dispatch parallel agents and synthesize the result.',
+  },
+}
+const oldMode = localStorage.getItem('relay.mode')
+const savedMode = ['plan','code','orchestrate'].includes(oldMode) ? oldMode : 'code'
+let S = {
+  session:null, sessions:[], agents:[], roles:{}, instructors:[], quota:null, busy:false,
+  runningSessionIds:[], btwRuns:0,
+  connections:[], providers:[], registry:{mcp:[],plugins:[]}, slashMatches:[], slashIndex:0,
+  connectPick:'', connectQuery:'', connectEdit:'', connectCustom:'',
+  openThinking:new Set(), mode:savedMode,
+  model: localStorage.getItem('relay.model') || '',
+  modelAgent: localStorage.getItem('relay.modelAgent') || '',
+}
+
+async function api(path, opts={}) {
+  const r = await fetch(path, { headers:{'content-type':'application/json'}, ...opts })
+  const data = await r.json().catch(()=>({}))
+  if (!r.ok) throw new Error(data.error || r.statusText)
+  return data
+}
+
+function toast(text) {
+  const d = document.createElement('div'); d.textContent = text
+  $('#toast').append(d); setTimeout(()=>d.remove(), 5000)
+}
+
+function agentDot(id) {
+  return document.querySelector(`.agent[data-id="${id}"] .dot`)
+}
+function setAgentState(id, state) {
+  const el = agentDot(id); if (!el) return
+  el.className = 'dot ' + (state === 'running' ? 'running' : state === 'cooling' ? 'cooling' : '')
+}
+
+const AVATARS = {
+  qoder:['Q','#a78bfa'], agy:['A','#c4b5fd'], 'agy-flash':['✦','#e9d5ff'],
+  kilo:['K','#fb923c'], 'opencode-build':['O','#22d3ee'], kiro:['K','#f472b6'],
+  nvidia:['N','#76b900'], gemini:['G','#60a5fa'], claude:['C','#f59e0b'],
+  codex:['◈','#34d399'], cline:['L','#94a3b8'],
+}
+function avatar(id, cls='', dot=true, state='') {
+  const [ch, col] = AVATARS[id] || [String(id || '?').replace(/^api-/, '').slice(0,1).toUpperCase() || '?', '#f59e0b']
+  return `<span class="avatar ${cls}" style="--av:${col}" aria-hidden="true">${esc(ch)}${dot ? `<span class="dot ${state}"></span>` : ''}</span>`
+}
+
+const shortModel = m => String(m || '').replace(/^(kilo|opencode|nvidia)\//, '')
+function splitReasoning(raw) {
+  let thinking = '', output = String(raw || '')
+  output = output.replace(/<(?:thinking|reasoning|scratchpad)>([\s\S]*?)<\/(?:thinking|reasoning|scratchpad)>/gi, (_, inner) => {
+    thinking += `${thinking ? '\n\n' : ''}${inner.trim()}`
+    return ''
+  })
+  output = output.replace(/<thinking>[\s\S]*$/i, '').trim()
+  return { thinking: thinking.trim(), output: output.trim() }
+}
+
+function usageMap() {
+  try { return JSON.parse(localStorage.getItem('relay.modelUsage') || '{}') || {} } catch { return {} }
+}
+function trackModel(model, agent) {
+  const usage = usageMap()
+  const key = model && agent ? `${agent}:${model}` : 'auto'
+  usage[key] = (usage[key] || 0) + 1
+  localStorage.setItem('relay.modelUsage', JSON.stringify(usage))
+}
+function modelChoices() {
+  const usage = usageMap()
+  return S.agents.filter(a => !a.disabled).flatMap(a => (a.models || []).map(model => ({
+    model, agent:a.id, label:a.label, key:`${a.id}:${model}`, usage:usage[`${a.id}:${model}`] || 0,
+    isDefault: model === a.model,
+  })))
+}
+function topModels(limit=9) {
+  const all = modelChoices()
+  const seen = new Set()
+  const current = S.model ? all.find(x => x.model === S.model && x.agent === S.modelAgent) || all.find(x => x.model === S.model) : null
+  const ordered = [...all].sort((a,b) => b.usage - a.usage || Number(b.isDefault) - Number(a.isDefault) || a.label.localeCompare(b.label))
+  const out = current ? [current] : []
+  for (const item of ordered) {
+    const key = `${item.agent}:${item.model}`
+    if (seen.has(key) || out.some(x => x.agent === item.agent && x.model === item.model)) continue
+    if (out.length >= limit) break
+    seen.add(key); out.push(item)
+  }
+  return out
+}
+function renderModelButton() {
+  const cur = S.model ? shortModel(S.model) : 'auto'
+  $('#currentModel').textContent = cur
+  const a = S.modelAgent ? S.agents.find(x => x.id === S.modelAgent) : null
+  $('#currentModelAgent').textContent = a ? `· ${a.label}` : (S.model ? '' : '· routing')
+  $('#modelBtn').title = S.model ? `${S.model}${a ? ` via ${a.label}` : ''}` : 'Automatic model routing'
+}
+function renderModelPop() {
+  const usage = usageMap()
+  const rows = topModels()
+  const auto = `<button class="model-item ${S.model ? '' : 'on'}" data-pick-model="" data-model-agent=""><span class="mi-main"><b>auto</b><span>let Relay route by role and quota</span></span><span class="mi-use">${usage.auto || 0}×</span></button>`
+  $('#modelList').innerHTML = auto + rows.map(x =>
+    `<button class="model-item ${S.model === x.model && (!S.modelAgent || S.modelAgent === x.agent) ? 'on' : ''}" data-pick-model="${esc(x.model)}" data-model-agent="${esc(x.agent)}">
+      <span class="mi-main"><b>${esc(shortModel(x.model))}</b><span>${esc(x.label)}${x.isDefault ? ' · default' : ''}</span></span>
+      <span class="mi-use">${x.usage ? `${x.usage}×` : ''}</span>
+    </button>`).join('')
+  $('#modelPop').hidden = false
+}
+function findModel(name, agentId='') {
+  if (!name) return { model:'', agent:'' }
+  if (agentId) {
+    const a = S.agents.find(x => x.id === agentId && !x.disabled)
+    const hit = a?.models?.find(m => m === name || shortModel(m) === name)
+    if (hit) return { model:hit, agent:a.id }
+  }
+  for (const a of S.agents) {
+    if (a.disabled || !a.models?.length) continue
+    const hit = a.models.find(m => m === name || shortModel(m) === name)
+    if (hit) return { model:hit, agent:a.id }
+  }
+  return null
+}
+function setModel(name, agentId='', quiet=false) {
+  if (!name) {
+    S.model = ''; S.modelAgent = ''
+    localStorage.removeItem('relay.model'); localStorage.removeItem('relay.modelAgent')
+    renderModelButton(); $('#modelPop').hidden = true
+    if (!quiet) toast('model: auto')
+    return true
+  }
+  const found = findModel(name, agentId)
+  if (!found) { toast(`unknown model ${name}`); return false }
+  S.model = found.model; S.modelAgent = found.agent
+  localStorage.setItem('relay.model', S.model)
+  localStorage.setItem('relay.modelAgent', S.modelAgent)
+  renderModelButton(); $('#modelPop').hidden = true
+  if (!quiet) toast(`model: ${shortModel(S.model)}${S.modelAgent ? ` · ${S.agents.find(a=>a.id===S.modelAgent)?.label || S.modelAgent}` : ''}`)
+  return true
+}
+
+function planModelApplies(m) {
+  if (!m?.model) return false
+  return (m.steps || []).some(s => (s.agents?.length ? s.agents : [s.agent]).some(name => {
+    const a = S.agents.find(x => x.id === name)
+    if (a) return a.models?.includes(m.model)
+    const first = (S.roles?.[name] || []).map(id => S.agents.find(x => x.id === id)).find(x => x && !x.disabled)
+    return first?.models?.includes(m.model)
+  }))
+}
+function modelPicker(planId, i, agentId, selected='') {
+  const a = S.agents.find(x => x.id === agentId)
+  if (!a?.models?.length) return ''
+  const pick = a.models.includes(selected) ? selected : ''
+  const def = a.model ? `default · ${shortModel(a.model)}` : 'default'
+  return `<select data-plan-model="${esc(planId)}" data-i="${i}" title="Model for this step">
+    <option value=""${pick ? '' : ' selected'}>${esc(def)}</option>
+    ${a.models.map(m => `<option value="${esc(m)}"${m===pick?' selected':''}>${esc(shortModel(m))}</option>`).join('')}
+  </select>`
+}
+
+function renderAgents() {
+  $('#agents').innerHTML = S.agents.map(a => `
+    <div class="agent ${a.disabled ? 'off' : ''}" data-id="${esc(a.id)}" title="${esc((a.caps||'') + (a.note ? '\n\n' + a.note : ''))}">
+      ${avatar(a.id)}
+      <div class="agent-meta"><div class="agent-name">${esc(a.label)}${a.connectionId ? ' <span class="badge">api</span>' : ''}${a.disabled ? ' <span class="badge">off</span>' : ''}</div>
+      <small>${esc(a.model || a.id)}</small></div>
+    </div>`).join('')
+  $('#roles').innerHTML = '<h3>Roles</h3>' + Object.entries(S.roles||{}).map(([k,v]) =>
+    `<div><b>${esc(k)}</b><span>${v.map(esc).join(' → ')}</span></div>`).join('')
+  renderModelButton()
+}
+
+function renderUsage() {
+  const box = $('#usageStats')
+  if (!box) return
+  const msgs = S.session?.messages || []
+  const steps = msgs.filter(m => m.role === 'step')
+  const done = steps.filter(m => m.status === 'done').length
+  const failed = steps.filter(m => ['failed', 'timeout', 'quota', 'stopped'].includes(m.status)).length
+  const running = steps.filter(m => m.status === 'running').length
+  const elapsed = steps.reduce((n, m) => n + (Number(m.durationMs) || 0), 0)
+  const chats = S.sessions?.length || 0
+  const apis = S.connections?.length || 0
+  const rate = steps.length ? Math.round((done / steps.length) * 100) : 0
+  const cards = [
+    ['chats', String(chats)],
+    ['steps here', String(steps.length)],
+    ['done', steps.length ? `${rate}%` : '—'],
+    ['failed', String(failed)],
+    ['runtime', elapsed ? fmtDur(elapsed) : '—'],
+    ['API keys', String(apis)],
+  ]
+  const modelCounts = steps.reduce((all, m) => {
+    if (m.model) all[m.model] = (all[m.model] || 0) + 1
+    return all
+  }, {})
+  const models = Object.entries(modelCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  box.innerHTML = cards.map(([label, value]) => `<div class="usage-card"><b title="${esc(value)}">${esc(value)}</b><span>${esc(label)}</span></div>`).join('') +
+    `<div class="usage-models" style="grid-column:1/-1">
+      <div class="usage-models-head"><span>models used</span><span>${running ? `${running} running` : ''}</span></div>
+      ${models.length ? models.map(([model, count]) => `<div class="usage-model"><span title="${esc(model)}">${esc(shortModel(model))}</span><b>${count}</b></div>`).join('') : '<div class="usage-empty">No model calls in this chat yet.</div>'}
+    </div>`
+}
+
+function renderQuota() {
+  const q = S.quota
+  const route = $('#quotaRoute')
+  const list = $('#quota')
+  if (!route || !list) return
+  if (!q) {
+    route.textContent = 'waiting for Relay…'
+    list.innerHTML = ''
+    return
+  }
+  $('#quotaMode').textContent = q.mode === 'local-observed' ? 'local' : 'quota'
+  if (q.route) {
+    const pct = q.route.percent == null ? '' : ` · ${q.route.percent}%`
+    route.innerHTML = `<span class="qr-label">next route</span><b class="q-${esc(q.route.level || 'unknown')}">${esc(q.route.label || q.route.id)}</b><span>${esc(pct)}</span>`
+  } else {
+    route.innerHTML = '<span class="qr-label">next route</span><span>none eligible — all cooling/out</span>'
+  }
+  list.innerHTML = (q.agents || []).map(a => {
+    const pct = a.percent == null ? null : Math.max(0, Math.min(100, a.percent))
+    const width = pct == null ? 0 : pct
+    const cap = a.limit > 0 ? `${a.used}/${a.limit} ${a.window}` : `${a.used} calls`
+    const tag = a.disabled ? 'off' : a.cooling ? 'cooling' : a.out ? 'out' : a.level === 'out' ? '95%+' : ''
+    const detail = [a.outReason, a.quotaHits ? `${a.quotaHits} quota hit${a.quotaHits === 1 ? '' : 's'}` : '', a.lastAt ? `last ${fmtWhen(a.lastAt)}` : ''].filter(Boolean).join(' · ')
+    return `<div class="qrow" title="${esc(detail)}">
+      <div class="qrow-top"><span class="qname">${esc(a.label || a.id)}</span><span class="qcap">${esc(cap)}</span><span class="qpct q-${esc(a.level)}">${pct == null ? '—' : `${pct}%`}</span><button class="quota-set" data-quota-set="${esc(a.id)}" title="Set a local cap">set</button></div>
+      <div class="qbar"><i class="q-${esc(a.level)}" style="width:${width}%"></i></div>
+      ${tag ? `<div class="qcap" style="margin-top:3px">${esc(tag)}${detail ? ` · ${esc(detail)}` : ''}</div>` : ''}
+    </div>`
+  }).join('')
+}
+
+async function refreshQuota() {
+  try {
+    const q = await api('/api/quota')
+    S.quota = q
+    renderQuota()
+  } catch {}
+}
+
+function renderInstructors() {
+  const sel = $('#instructorSel')
+  if (!sel) return
+  const cur = S.session?.instructor || localStorage.getItem('relay.instructor') || 'opencode'
+  sel.innerHTML = S.instructors.map(i => `<option value="${esc(i.id)}" title="${esc(i.label)}">instructor · ${esc(i.id)}</option>`).join('') +
+    '<option value="auto">instructor · auto</option>'
+  sel.value = [...sel.options].some(o => o.value === cur) ? cur : 'opencode'
+}
+
+function renderThread() {
+  const t = $('#thread')
+  const keepTop = t.scrollTop
+  renderUsage()
+  const msgs = S.session?.messages || []
+  S.btwBusy = msgs.some(m => m.role === 'step' && m.kind === 'btw' && m.status === 'running')
+  if (!msgs.length) {
+    t.innerHTML = `<div class="empty">
+      <div class="empty-kicker">relay / workspace</div>
+      <h1>What do you want to build?</h1>
+      <p>Plan it, code it, or fan it out to several agents. Relay keeps the plan and the reasoning out of the way until you ask for it.</p>
+      <p><code>Plan</code> writes a plan · <code>Code</code> plans and runs · <code>Orchestrate</code> sends parallel agents</p>
+      <div class="starters">
+        <button data-starter="Build a small REST API with tests">Build an API</button>
+        <button data-starter="Review the current project and find the riskiest bug">Review this project</button>
+        <button data-starter="Compare two implementation approaches and recommend the faster one">Compare approaches</button>
+      </div></div>`
+    return
+  }
+  t.innerHTML = msgs.map(renderMsg).join('')
+  t.scrollTop = keepTop
+}
+
+function renderMsg(m) {
+  if (m.role === 'user') {
+    return `<article class="msg user"><div class="who">You <span class="time">${stamp(m.at)}</span></div><div class="body">${esc(m.text)}</div></article>`
+  }
+  if (m.role === 'note') return `<article class="msg notice">${esc(m.text)}</article>`
+
+  if (m.role === 'plan') {
+    const tid = `plan:${m.id}`
+    const open = S.openThinking.has(tid)
+    const steps = (m.steps||[]).map((s,i) => {
+      const agents = s.agents || []
+      const picker = agents.length
+        ? `<input data-plan-agents="${esc(m.id)}" data-i="${i}" value="${esc(agents.join(', '))}" title="Comma-separated agents — they run in parallel" />`
+        : `<div class="plan-pick">
+          <select data-plan-agent="${esc(m.id)}" data-i="${i}" title="Agent for this step">
+            ${[...Object.keys(S.roles||{}).map(r=>`<option value="${esc(r)}"${s.agent===r?' selected':''}>role: ${esc(r)}</option>`),
+               ...S.agents.filter(a=>!a.disabled).map(a=>`<option value="${esc(a.id)}"${s.agent===a.id?' selected':''}>${esc(a.label)}</option>`)].join('')}
+          </select>
+          <span data-model-slot>${modelPicker(m.id, i, s.agent, s.model || (planModelApplies(m) ? m.model : ''))}</span>
+        </div>`
+      return `<div class="plan-step">${picker}<textarea data-plan-prompt="${esc(m.id)}" data-i="${i}">${esc(s.prompt)}</textarea></div>`
+    }).join('')
+    return `<article class="msg plan" data-id="${esc(m.id)}">
+      <div class="plan-head"><div class="who" style="margin:0">Plan</div>
+        <span class="badge">${esc(m.via || '')}</span>
+        ${m.mode ? `<span class="badge">${esc(m.mode)}</span>` : ''}
+        ${planModelApplies(m) ? `<span class="badge" title="Model override for this plan">${esc(shortModel(m.model))}</span>` : ''}
+        <span class="muted" style="font-size:10px">${stamp(m.at)}</span></div>
+      <div class="plan-summary">${esc(m.note || '')}</div>
+      <details class="thinking" data-thinking="${esc(tid)}" ${open ? 'open' : ''}>
+        <summary><span>thinking</span><span class="tsum">plan · ${(m.steps||[]).length} step(s)${m.via === 'rules' ? ' · rules fallback' : ''}</span></summary>
+        <div class="thinking-body">
+          ${m.via === 'rules' && m.detail?.length ? `<div class="thinking-label">fallback details</div><div class="think-pre">${esc(m.detail.join('\n'))}</div>` : ''}
+          ${m.detail?.length && m.via !== 'rules' ? `<div class="thinking-label">planner attempts</div><div class="think-pre">${esc(m.detail.join('\n'))}</div>` : ''}
+          <div class="thinking-label">steps</div>${steps}
+        </div>
+      </details>
+      <div class="plan-actions">
+        <button class="primary" data-run-plan="${esc(m.id)}">Run plan</button>
+        <span class="muted">${(m.steps||[]).length} step(s) · each step sees every earlier output</span>
+      </div></article>`
+  }
+
+  if (m.role === 'step' && m.kind === 'btw') {
+    const state = m.status==='running'?'running':(m.status==='failed'||m.status==='timeout'||m.status==='quota')?'fail':''
+    const split = m.thinking ? { output:m.text || '', thinking:m.thinking } : splitReasoning(m.text || '')
+    return `<article class="msg step btw" data-id="${esc(m.id)}">
+      <div class="step-head">${avatar(m.agent || m.label || '?', 'sm', true, state)}
+        <span class="badge">btw</span><b>${esc(m.label || m.agent)}</b>${m.model?`<span class="model">${esc(shortModel(m.model))}</span>`:''}
+        <span class="status ${esc(m.status)}">${esc(m.status)}</span>
+        <span class="time">${fmtDur(m.durationMs)}${m.endedAt?' · '+stamp(m.endedAt):''}</span></div>
+      ${m.question?`<div class="btw-q">${esc(m.question)}</div>`:''}
+      <details class="thinking" data-thinking="${esc(m.id)}" ${S.openThinking.has(m.id) || m.status === 'running' ? 'open' : ''}>
+        <summary><span>thinking</span><span class="tsum">${esc(m.why || 'side answer')}</span></summary>
+        <div class="thinking-body"><div class="thinking-label">prompt sent</div><div class="think-pre">${esc(m.prompt||'')}</div>${split.thinking?`<div class="thinking-label">reasoning</div><div class="think-pre">${esc(split.thinking)}</div>`:''}</div>
+      </details>
+      <div class="output-wrap"><div class="output-label">output</div><pre class="out" data-out="${esc(m.id)}">${esc(split.output || (m.status === 'running' ? '' : '(no output)'))}</pre></div>
+      <footer><button data-copy="${esc(m.id)}">copy</button><button data-pin="${esc(m.id)}">pin to context</button></footer></article>`
+  }
+
+  if (m.role === 'step') {
+    const split = m.thinking ? { output:m.text || '', thinking:m.thinking } : splitReasoning(m.text || '')
+    const git = m.git?.after ? `<div class="gitline">${esc((m.git.after.files||[]).join('\n') || 'no file changes')}${m.git.after.diffstat ? '\n'+esc(m.git.after.diffstat) : ''}</div>` : ''
+    const open = S.openThinking.has(m.id) || m.status === 'running'
+    return `<article class="msg step" data-id="${esc(m.id)}">
+      <div class="step-head">${avatar(m.agent || m.label || '?', 'sm', true, m.status==='running'?'running':(m.status==='failed'||m.status==='timeout'||m.status==='quota')?'fail':'')}
+        <b>${esc(m.label || m.agent)}</b>${m.model?`<span class="model">${esc(shortModel(m.model))}</span>`:''}
+        ${m.resume?.reused?'<span class="badge">resumed</span>':''}
+        <span class="status ${esc(m.status)}">${esc(m.status)}</span>
+        <span class="time">${fmtDur(m.durationMs)}${m.endedAt?' · '+stamp(m.endedAt):''}</span></div>
+      <details class="thinking" data-thinking="${esc(m.id)}" ${open ? 'open' : ''}>
+        <summary><span>thinking</span><span class="tsum">${esc(m.why || 'prompt & reasoning')}</span></summary>
+        <div class="thinking-body">
+          ${m.why?`<div class="thinking-label">why</div><div class="why">${esc(m.why)}</div>`:''}
+          ${m.fallback?.length?`<div class="fallback">↳ ${esc(m.fallback.map(f => `${f.from} ${f.reason} → ${f.to}`).join(' · '))}</div>`:''}
+          ${split.thinking?`<div class="thinking-label">reasoning</div><div class="think-pre">${esc(split.thinking)}</div>`:''}
+          <div class="thinking-label">prompt sent</div><div class="think-pre">${esc(m.prompt||'')}</div>
+        </div>
+      </details>
+      <div class="output-wrap">
+        <div class="output-label">output</div>
+        <pre class="out" data-out="${esc(m.id)}">${esc(split.output || (m.status === 'running' ? '' : '(no output)'))}</pre>
+      </div>
+      ${git}
+      <footer><button data-copy="${esc(m.id)}">copy</button><button data-pin="${esc(m.id)}">pin to context</button></footer></article>`
+  }
+  return ''
+}
+
+function renderPinned() {
+  const p = S.session?.pinned || []
+  const notes = S.session?.notes || []
+  const pins = p.length ? p.map(x => `<div class="pin"><b>${esc(x.agent)}</b><p>${esc((x.text||'').slice(0,300))}</p></div>`).join('')
+    : '<span class="muted" style="font-size:11px">Pin a step output to include it in every later call.</span>'
+  const side = notes.length ? `<h3 style="margin-top:18px">Side notes</h3>${notes.map(n => `<div class="pin"><b>btw</b><p>${esc(n.text)}</p></div>`).join('')}` : ''
+  $('#pinned').innerHTML = pins + side
+}
+
+function sessionDelete(s, activeId = S.session?.id) {
+  if (S.runningSessionIds.includes(s.id)) return '<button class="sess-del" disabled title="Run active — stop it before deleting">&times;</button>'
+  if (s.id === activeId) return '<button class="sess-del" disabled title="Active session — switch before deleting">&times;</button>'
+  return `<button class="sess-del" data-del-session="${esc(s.id)}" data-session-title="${esc(s.title)}" title="Delete session" aria-label="Delete ${esc(s.title)}">&times;</button>`
+}
+function renderSessions(list) {
+  const el = $('#sessions')
+  if (!el) return
+  const running = new Set(S.runningSessionIds || [])
+  const rows = list || []
+  el.innerHTML = rows.length ? rows.map(s => {
+    const on = s.id === S.session?.id
+    const live = running.has(s.id)
+    return `<div class="tab-sess-row">
+      <button class="sess ${on?'on':''} ${live?'running':''}" data-session="${esc(s.id)}" title="${esc(s.cwd||'')}${live?' · run active':''}"${on?' aria-current="page"':''}>
+        <span class="sess-title">${esc(s.title)}</span><span class="sess-time">${live ? '<span class="sess-run">running</span>' : fmtTabWhen(s.updatedAt)}</span>
+      </button>${sessionDelete(s)}</div>`
+  }).join('') : '<span class="muted" style="font-size:10px">no chats yet</span>'
+  const active = el.querySelector('.sess.on')
+  if (active) {
+    const box = el.getBoundingClientRect()
+    const r = active.getBoundingClientRect()
+    if (r.left < box.left) el.scrollLeft -= (box.left - r.left) + 4
+    else if (r.right > box.right) el.scrollLeft += (r.right - box.right) + 4
+  }
+}
+
+function planStepsFromDom(id) {
+  const msg = S.session.messages.find(m => m.id === id)
+  return [...document.querySelectorAll(`[data-plan-agent="${CSS.escape(id)}"], [data-plan-agents="${CSS.escape(id)}"]`)].map(el => {
+    const i = el.dataset.i
+    const prompt = document.querySelector(`[data-plan-prompt="${CSS.escape(id)}"][data-i="${i}"]`).value
+    const why = msg?.steps?.[i]?.why || ''
+    const model = document.querySelector(`[data-plan-model="${CSS.escape(id)}"][data-i="${i}"]`)?.value || undefined
+    return el.dataset.planAgents != null
+      ? { agents: el.value.split(',').map(x => x.trim()).filter(Boolean), prompt, why }
+      : { agent: el.value, model, prompt, why }
+  })
+}
+
+function renderBusy() {
+  const elsewhere = S.busy && S.runningSessionIds.length > 0 && !S.runningSessionIds.includes(S.session?.id)
+  $('#busy').textContent = !S.busy ? 'idle' : elsewhere ? 'working elsewhere' : 'working'
+  $('#busy').title = elsewhere ? 'A run is active in another session' : S.busy ? 'Run active in this session' : ''
+  $('#busy').classList.toggle('on', S.busy)
+  document.body.classList.toggle('busy', S.busy)
+}
+
+function renderAll(list) {
+  if (list) S.sessions = list
+  if (S.model) {
+    const found = findModel(S.model, S.modelAgent)
+    if (!found) {
+      S.model = ''; S.modelAgent = ''
+      localStorage.removeItem('relay.model'); localStorage.removeItem('relay.modelAgent')
+    } else {
+      S.model = found.model; S.modelAgent = found.agent
+    }
+  }
+  renderAgents(); renderQuota(); renderThread(); renderPinned(); renderInstructors(); renderModelButton()
+  renderSessions(S.sessions)
+  $('#cwd').value = S.session?.cwd || ''
+  renderBusy()
+  applyModeUi()
+  syncSend()
+}
+
+function syncSend() {
+  const meta = MODES[S.mode] || MODES.code
+  $('#send').textContent = meta.button
+  $('#send').disabled = S.busy
+}
+function scrollDown(force) {
+  const t = $('#thread')
+  if (force || t.scrollHeight - t.scrollTop - t.clientHeight < 240) t.scrollTop = t.scrollHeight
+}
+function applyModeUi() {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.mode === S.mode))
+  const meta = MODES[S.mode] || MODES.code
+  $('#instructorSel').style.display = S.mode === 'orchestrate' ? 'none' : ''
+  $('#modeLabel').textContent = `${meta.label} mode`
+  $('#hint').innerHTML = `${meta.hint} <code>/help</code> commands · Esc stops a run`
+  $('#input').placeholder = meta.placeholder
+  syncSend()
+}
+function setMode(mode, quiet=false) {
+  if (!MODES[mode]) { toast(`unknown mode ${mode}`); return false }
+  S.mode = mode
+  localStorage.setItem('relay.mode', mode)
+  applyModeUi()
+  if (!quiet) toast(`mode: ${mode}`)
+  return true
+}
+
+function applyBootstrap(d) {
+  S.session = d.session; S.agents = d.agents; S.roles = d.roles; S.instructors = d.instructors || []
+  S.quota = d.quota || S.quota; S.busy = d.busy
+  S.sessions = d.sessions || S.sessions
+  S.runningSessionIds = d.runningSessionIds || []
+  S.btwRuns = d.btwRuns || 0
+  S.connections = d.connections || []; S.registry = d.registry || S.registry
+}
+async function boot() {
+  const d = await api('/api/bootstrap')
+  applyBootstrap(d)
+  renderAll(d.sessions)
+  scrollDown(true)
+  // Keep the same SSE stream across session switches. Reconnecting here used
+  // to lose events emitted during the gap.
+  if (!es) connect()
+}
+async function refresh() {
+  const d = await api('/api/bootstrap')
+  applyBootstrap(d)
+  renderAll(d.sessions)
+}
+
+const COMMANDS = [
+  { name:'help', args:'', desc:'List every command' },
+  { name:'new', args:'', desc:'Start a new session' },
+  { name:'rename', args:'[title]', desc:'Rename this session' },
+  { name:'model', args:'[name]', desc:'Open the most-used model picker or switch models' },
+  { name:'models', args:'', desc:'Browse every model' },
+  { name:'mode', args:'[plan|code|orchestrate]', desc:'Switch mode' },
+  { name:'connect', args:'', desc:'Connect an API key and add models' },
+  { name:'mcp', args:'', desc:'Add MCP servers and plugins' },
+  { name:'status', args:'', desc:'Show session, mode, model, and run status' },
+  { name:'btw', args:'<question|objective>', desc:'Ask a side question or add an objective while the run continues' },
+  { name:'sessions', args:'', desc:'Switch sessions' },
+  { name:'agents', args:'', desc:'List agents and roles' },
+  { name:'quota', args:'', desc:'Show local quota meter and next route' },
+  { name:'instructor', args:'[name]', desc:'Pick the instructor' },
+  { name:'cwd', args:'<path>', desc:'Change the working directory' },
+  { name:'export', args:'', desc:'Download this session as JSON' },
+  { name:'stop', args:'', desc:'Stop the active run (Esc)' },
+]
+function parseSlash(text) {
+  const m = text.match(/^\/([a-z][\w-]*)(?:\s+([\s\S]*))?$/i)
+  return m ? { name:m[1].toLowerCase(), args:(m[2] || '').trim() } : null
+}
+function showModal(title, html) {
+  $('#modalTitle').textContent = title
+  $('#modalBody').innerHTML = html
+  $('#modal').hidden = false
+  const card = $('#modal .modal-card')
+  if (card) card.scrollTop = 0
+}
+function closeModal() { $('#modal').hidden = true }
+function showHelp() {
+  showModal('commands', COMMANDS.map(c =>
+    `<div class="cmd-item"><b>/${esc(c.name)}${c.args ? ' ' + esc(c.args) : ''}</b><span>${esc(c.desc)}</span></div>`).join('') +
+    '<div class="kv" style="margin-top:12px"><b>enter</b><span>Accept the highlighted slash command, then press Enter again to run it.</span></div>' +
+    '<div class="kv"><b>esc</b><span>Stop the active run from anywhere.</span></div>')
+}
+function showAllModels() {
+  const usage = usageMap()
+  const groups = S.agents.filter(a => !a.disabled && a.models?.length).map(a =>
+    `<div class="model-group"><h3>${esc(a.label)}</h3>${a.models.map(m => {
+      const count = usage[`${a.id}:${m}`] || 0
+      return `<button class="cmd-item" data-pick-model="${esc(m)}" data-model-agent="${esc(a.id)}"><b>${esc(shortModel(m))}</b><span>${esc(a.id)}${m === a.model ? ' · default' : ''}${count ? ` · used ${count}×` : ''}</span></button>`
+    }).join('')}</div>`).join('')
+  showModal('models', `<div class="modal-note">Pick a model for Plan, Code, and Orchestrate. Connected API models appear here after <code>/connect</code>.</div>
+    <button class="cmd-item" data-pick-model="" data-model-agent=""><b>auto</b><span>let Relay route by role and quota</span></button>${groups}`)
+}
+async function showStatus() {
+  const b = await api('/api/bootstrap')
+  const running = (b.session.messages || []).filter(m => m.role === 'step' && m.status === 'running')
+  const last = (b.session.messages || []).filter(m => m.role === 'step').at(-1)
+  const rows = [
+    ['session', `${b.session.title} · ${b.session.id}`],
+    ['cwd', b.session.cwd],
+    ['run', b.busy ? 'busy' : 'idle'],
+    ['mode', S.mode],
+    ['model', S.model ? `${S.model}${S.modelAgent ? ` · ${S.modelAgent}` : ''}` : 'auto'],
+    ['instructor', b.session.instructor || 'opencode'],
+    ['agents', `${b.agents.filter(a => !a.disabled).length} enabled / ${b.agents.length} total`],
+    ['connected APIs', String((b.connections || []).length)],
+    ['MCP servers', String((b.registry?.mcp || []).length)],
+    ['plugins', String((b.registry?.plugins || []).length)],
+    ['side notes', String((b.session.notes || []).length)],
+  ]
+  if (running.length) rows.push(['active', running.map(m => `${m.label || m.agent} (${fmtDur(Date.now() - new Date(m.startedAt))})`).join(', ')])
+  if (last) rows.push(['last step', `${last.agent} · ${last.status}`])
+  showModal('status', rows.map(([k, v]) => `<div class="kv"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join(''))
+}
+async function showQuota() {
+  await refreshQuota()
+  const q = S.quota
+  if (!q) { toast('quota meter is not available yet'); return }
+  const rows = (q.agents || []).map(a => {
+    const pct = a.percent == null ? '—' : `${a.percent}%`
+    const cap = a.limit > 0 ? `${a.used}/${a.limit} ${a.window}` : `${a.used} calls`
+    const state = a.disabled ? 'off' : a.cooling ? 'cooling' : a.out ? `out · ${a.outReason || 'quota'}` : a.level === 'out' ? '95%+ · out' : a.level
+    return `<div class="kv"><b>${esc(a.label || a.id)}</b><span class="q-${esc(a.level)}">${esc(pct)} · ${esc(cap)} · ${esc(state)}</span></div>`
+  }).join('')
+  const route = q.route ? `${q.route.label}${q.route.percent == null ? '' : ` · ${q.route.percent}%`}` : 'none eligible'
+  showModal('quota', `<div class="quota-note">${esc(q.note || '')}</div>
+    <div class="kv"><b>next route</b><span class="q-${esc(q.route?.level || 'unknown')}">${esc(route)}</span></div>${rows}
+    <div class="quota-note" style="margin-top:12px">Set a cap with the <b>set</b> button in the Quota panel, or run <code>relay quota set &lt;agent&gt; &lt;calls&gt;</code>. Caps are local guardrails; the provider's own dashboard is authoritative.</div>`)
+}
+async function showSessions() {
+  const b = await api('/api/bootstrap')
+  S.runningSessionIds = b.runningSessionIds || []
+  const list = (b.sessions || []).map(s =>
+    `<div class="sess-row"><button class="cmd-item" data-pick-session="${esc(s.id)}"><b>${esc(s.title)}</b><span>${esc(s.cwd || '')} · ${fmtWhen(s.updatedAt)}</span></button>${sessionDelete(s, b.session.id)}</div>`).join('')
+  showModal('sessions', list || '<div class="muted">No sessions yet.</div>')
+}
+function showAgents() {
+  const roles = Object.entries(S.roles || {}).map(([k, v]) =>
+    `<div class="kv"><b>${esc(k)}</b><span>${v.map(esc).join(' → ')}</span></div>`).join('')
+  const list = S.agents.map(a =>
+    `<div class="kv"><b>${esc(a.id)}</b><span>${esc(a.label)}${a.connectionId ? ' · connected API' : ''}${a.disabled ? ' · off' : ''}<br><span class="muted">${esc(a.caps || '')}</span></span></div>`).join('')
+  showModal('agents', roles + '<h3 style="margin-top:16px">Registry</h3>' + list)
+}
+
+function providerHue(provider) {
+  let h = 0
+  for (const ch of String(provider?.id || '')) h = (h * 31 + ch.charCodeAt(0)) % 360
+  return h
+}
+function providerAvatar(provider) {
+  const initials = String(provider?.name || provider?.id || '?').split(/\s+/).map(s => s[0]).join('').slice(0, 2).toUpperCase()
+  return initials.length > 1 && initials[0] === initials[1] ? initials[0] : initials
+}
+function providerCard(provider) {
+  const proto = provider.protocol === 'anthropic' ? 'Anthropic' : 'OpenAI'
+  const models = provider.models || []
+  return `<button type="button" class="provider-card" data-conn-pick="${esc(provider.id)}" style="--ph:${providerHue(provider)}">
+    <span class="provider-avatar">${esc(providerAvatar(provider))}</span>
+    <span class="provider-info"><b>${esc(provider.name)}${provider.popular ? ' <em>popular</em>' : ''}</b>
+      <small>${esc(provider.note || '')}</small>
+      <span class="provider-meta">${esc(proto)} · ${models.length ? `${models.length} model${models.length === 1 ? '' : 's'}` : 'add model id'}</span></span>
+  </button>`
+}
+function filteredProviders() {
+  const q = S.connectQuery.trim().toLowerCase()
+  if (!q) return S.providers
+  const terms = q.split(/\s+/)
+  return S.providers.filter(provider => {
+    const hay = [provider.name, provider.id, provider.protocol, provider.note, ...(provider.tags || []), ...(provider.models || [])].join(' ').toLowerCase()
+    return terms.every(term => hay.includes(term))
+  })
+}
+function renderProviderGrid() {
+  const grid = $('#connGrid')
+  if (!grid) return
+  const list = filteredProviders()
+  grid.innerHTML = list.length ? list.map(providerCard).join('')
+    : `<div class="provider-empty">No providers match “${esc(S.connectQuery.trim())}”. Try a model name, or use a custom endpoint below.</div>`
+  const count = $('#connCount')
+  if (count) count.textContent = `${list.length} / ${S.providers.length}`
+}
+function connectAdvanced(provider, connection, fallbackProtocol = 'openai') {
+  const proto = connection?.protocol || provider?.protocol || fallbackProtocol
+  const name = connection?.name || provider?.name || ''
+  const baseUrl = connection?.baseUrl || provider?.baseUrl || ''
+  const models = (connection?.models?.length ? connection.models : provider?.models || []).join(', ')
+  return `<details class="connect-advanced" ${connection || !provider || !(provider.models || []).length ? 'open' : ''}>
+    <summary>Advanced · name, endpoint, models</summary>
+    <div class="form-grid" style="margin-top:10px">
+      <label>Name<input id="connName" value="${esc(name)}" placeholder="Groq / my gateway" /></label>
+      <label>Protocol<select id="connProtocol"><option value="openai" ${proto === 'openai' ? 'selected' : ''}>OpenAI-compatible</option><option value="anthropic" ${proto === 'anthropic' ? 'selected' : ''}>Anthropic Messages</option></select></label>
+      <label class="wide">Base URL<input id="connBase" value="${esc(baseUrl)}" placeholder="https://api.openai.com/v1" /></label>
+      <label class="wide">Models (comma or newline separated)<input id="connModels" value="${esc(models)}" placeholder="gpt-6.1-sol, gpt-6-luna" /></label>
+    </div>
+    <div class="connect-fineprint">${provider ? (provider.models?.length ? 'Model ids are presets from the provider catalog. Edit them here if the provider has newer models.' : 'This provider has no preset model ids. Enter the exact id from its documentation.') : 'Use the exact model ids your endpoint expects.'}</div>
+  </details>`
+}
+function connectForm(provider, connection, customProtocol = '') {
+  const editing = !!connection
+  const proto = customProtocol || provider?.protocol || 'openai'
+  const title = provider?.name || (proto === 'anthropic' ? 'Custom Anthropic endpoint' : 'Custom OpenAI-compatible endpoint')
+  const note = provider?.note || (proto === 'anthropic' ? 'Any endpoint that speaks the Anthropic Messages API.' : 'Any endpoint that speaks OpenAI chat completions.')
+  const models = (provider?.models || [])
+  const modelLine = models.length
+    ? `${models.length} model${models.length === 1 ? '' : 's'} · starts with <code>${esc(models[0])}</code>`
+    : 'Add the model ids in Advanced.'
+  const keyPlaceholder = editing && connection.hasKey
+    ? `leave blank to keep ${connection.keyHint || 'the current key'}`
+    : 'paste API key'
+  const intro = editing
+    ? 'Editing an existing connection. The key stays masked in the browser.'
+    : provider ? 'Paste one key. Relay fills in the endpoint and model ids.' : 'Use your own endpoint. Fill in the endpoint and model ids below.'
+  return `<div class="modal-note">${intro}</div>
+    <div class="provider-hero" style="--ph:${providerHue(provider || { id: proto })}">
+      <span class="provider-avatar">${esc(provider ? providerAvatar(provider) : (proto === 'anthropic' ? 'A' : 'O'))}</span>
+      <div class="provider-hero-main"><b>${esc(editing ? connection.name : title)}</b><small>${esc(note)}</small>
+        <span class="provider-meta">${esc(proto === 'anthropic' ? 'Anthropic Messages' : 'OpenAI-compatible')} · ${models.length ? modelLine : 'custom models'}</span></div>
+    </div>
+    <label class="key-field">API key<input id="connKey" type="password" placeholder="${esc(keyPlaceholder)}" autocomplete="off" spellcheck="false" /></label>
+    ${connectAdvanced(provider, connection, proto)}
+    <div class="connect-actions">
+      <button class="primary" data-conn-save>${editing ? 'Save changes' : `Connect ${esc(title)}`}</button>
+      ${editing ? '<button data-conn-back>cancel edit</button>' : '<button data-conn-back>choose another</button>'}
+      ${provider?.keyUrl ? `<a class="key-link" href="${esc(provider.keyUrl)}" target="_blank" rel="noreferrer">get key from ${esc(provider.name)} ↗</a>` : ''}
+      ${provider?.docs ? `<a class="key-link" href="${esc(provider.docs)}" target="_blank" rel="noreferrer">docs ↗</a>` : ''}
+    </div>
+    <div class="connect-fineprint">The key is written to <code>relay/sessions/connections.json</code> with best-effort file permissions. The browser only gets a masked hint; the key is never sent in a chat message or agent prompt.</div>`
+}
+function connectDirectory() {
+  const list = S.connections.length ? S.connections.map(c => {
+    const providerName = S.providers.find(p => p.id === c.providerId)?.name || c.providerId
+    return `<div class="conn-item">
+      <div class="ci-main"><b>${esc(c.name)} <span class="badge">${esc(c.protocol)}</span>${c.providerId && c.providerId !== c.protocol ? ` <span class="badge">${esc(providerName)}</span>` : ''}</b>
+        <small>${esc(c.baseUrl)}<br>${esc(c.models.slice(0, 4).join(', '))}${c.models.length > 4 ? ` +${c.models.length - 4} more` : ''}<br>key ${esc(c.keyHint || 'not set')} · ${esc(c.agentId)}</small></div>
+      <div class="row-actions"><button data-conn-edit="${esc(c.id)}">edit</button><button class="danger" data-conn-del="${esc(c.id)}">remove</button></div>
+    </div>`
+  }).join('') : '<div class="empty-list">No connected APIs yet. Pick a provider below; its models become available in <code>/model</code> immediately.</div>'
+  return `<div class="modal-note">Pick a provider, paste its key, done. The ${S.providers.length} entries here combine Relay's original presets with the chat-capable providers from the free API keys catalog; media-only and Responses-only APIs are not listed because Relay cannot call them. Provider balances stay on the provider dashboard; Relay tracks observed local calls only.</div>
+    <div class="subhead">connected</div><div class="conn-list">${list}</div>
+    <div class="subhead">provider directory</div>
+    <div class="connect-search"><input id="connSearch" type="search" value="${esc(S.connectQuery)}" placeholder="Search OpenAI, Claude, Gemini, Groq, DeepSeek, models…" autocomplete="off" spellcheck="false" /><span id="connCount"></span></div>
+    <div id="connGrid" class="provider-grid"></div>
+    <div class="subhead">custom endpoint</div>
+    <div class="custom-grid">
+      <button type="button" class="provider-card custom" data-conn-custom="openai"><span class="provider-avatar">+</span><span class="provider-info"><b>OpenAI-compatible</b><small>Ollama, LM Studio, vLLM, a gateway, or an unlisted provider.</small><span class="provider-meta">chat completions API</span></span></button>
+      <button type="button" class="provider-card custom" data-conn-custom="anthropic"><span class="provider-avatar">+</span><span class="provider-info"><b>Anthropic Messages</b><small>Any endpoint that speaks the Anthropic Messages API.</small><span class="provider-meta">messages API</span></span></button>
+    </div>`
+}
+function renderConnect() {
+  if (S.connectEdit && !S.connections.some(c => c.id === S.connectEdit)) {
+    S.connectEdit = ''
+  }
+  const connection = S.connectEdit ? S.connections.find(c => c.id === S.connectEdit) : null
+  const provider = S.connectPick ? S.providers.find(p => p.id === S.connectPick) : null
+  if (S.connectPick && !provider) S.connectPick = ''
+  if (connection) {
+    showModal('connect · edit API', connectForm(S.providers.find(p => p.id === connection.providerId), connection, connection.protocol))
+  } else if (provider) {
+    showModal('connect · API models', connectForm(provider))
+  } else if (S.connectCustom) {
+    showModal('connect · custom API', connectForm(null, null, S.connectCustom))
+  } else {
+    showModal('connect · API models', connectDirectory())
+    renderProviderGrid()
+  }
+  const focus = connection ? '#connName' : provider || S.connectCustom ? '#connKey' : '#connSearch'
+  setTimeout(() => $(focus)?.focus(), 30)
+}
+async function showConnect() {
+  S.connectPick = ''; S.connectQuery = ''; S.connectEdit = ''; S.connectCustom = ''
+  try {
+    const d = await api('/api/connections')
+    S.connections = d.connections || []
+  } catch (e) { toast(e.message); return }
+  if (!S.providers.length) {
+    try {
+      const p = await api('/api/providers')
+      S.providers = p.providers || []
+    } catch (e) { toast(`provider list unavailable: ${e.message}`) }
+  }
+  renderConnect()
+}
+
+async function showMcp() {
+  let reg
+  try {
+    reg = await api('/api/mcp')
+    S.registry = reg
+  } catch (e) { toast(e.message); return }
+  const servers = (reg.mcp || []).length ? reg.mcp.map(s => `<div class="mcp-item ${s.enabled ? '' : 'off'}">
+      <div class="ci-main"><b>${esc(s.name)} <span class="badge">${s.enabled ? 'on' : 'off'}</span></b>
+        <small>${esc(s.command)} ${esc((s.args || []).join(' '))}<br>agents: ${esc((s.agents || []).join(', '))}${s.envKeys?.length ? ` · env: ${esc(s.envKeys.join(', '))}` : ''}${s.note ? `<br>${esc(s.note)}` : ''}</small></div>
+      <div class="row-actions"><button data-mcp-toggle="${esc(s.id)}" data-enabled="${s.enabled ? '1' : '0'}">${s.enabled ? 'pause' : 'enable'}</button><button class="danger" data-mcp-del="${esc(s.id)}">remove</button></div>
+    </div>`).join('') : '<div class="empty-list">No MCP servers registered.</div>'
+  const plugins = (reg.plugins || []).length ? reg.plugins.map(p => `<div class="mcp-item ${p.enabled ? '' : 'off'}">
+      <div class="ci-main"><b>${esc(p.name)} <span class="badge">${p.enabled ? 'on' : 'off'}</span></b>
+        <small>agents: ${esc((p.agents || []).join(', '))}<br>${esc(p.instructions.slice(0, 180))}${p.instructions.length > 180 ? '…' : ''}</small></div>
+      <div class="row-actions"><button data-plugin-toggle="${esc(p.id)}" data-enabled="${p.enabled ? '1' : '0'}">${p.enabled ? 'pause' : 'enable'}</button><button class="danger" data-plugin-del="${esc(p.id)}">remove</button></div>
+    </div>`).join('') : '<div class="empty-list">No plugins registered.</div>'
+  showModal('MCP & plugins', `
+    <div class="modal-note">MCP servers are written to a generated config. Claude Code receives <code>--mcp-config</code>; every agent also gets <code>RELAY_MCP_CONFIG</code> and <code>RELAY_MCP_SERVERS</code>. Plugins are reusable instruction packs appended to the prompt for the selected agents. Secrets in env values are not sent back to the browser.</div>
+    <div class="subhead">MCP servers</div><div class="mcp-list">${servers}</div>
+    <div class="subhead">add MCP server</div>
+    <div class="form-grid">
+      <label>Name<input id="mcpName" placeholder="filesystem / browser / github" /></label>
+      <label>Command<input id="mcpCommand" placeholder="npx" /></label>
+      <label class="wide">Arguments<input id="mcpArgs" placeholder='-y @modelcontextprotocol/server-filesystem C:\work' /></label>
+      <label class="wide">Environment JSON (optional)<textarea id="mcpEnv" placeholder='{"API_KEY":"..."}'></textarea></label>
+      <label>Agents<input id="mcpAgents" value="*" placeholder="* or claude,opencode-build" /></label>
+      <label>Note<input id="mcpNote" placeholder="what this server provides" /></label>
+    </div>
+    <button class="primary" data-mcp-save>Add MCP server</button>
+    <div class="subhead">plugins</div><div class="mcp-list">${plugins}</div>
+    <div class="subhead">add plugin</div>
+    <div class="form-grid">
+      <label>Name<input id="pluginName" placeholder="review checklist" /></label>
+      <label>Agents<input id="pluginAgents" value="*" placeholder="* or claude,codex" /></label>
+      <label class="wide">Instructions<textarea id="pluginInstructions" placeholder="Always mention changed files. Prefer small diffs. Run tests before finishing."></textarea></label>
+    </div>
+    <button class="primary" data-plugin-save>Add plugin</button>`)
+}
+
+async function setInstructor(name) {
+  const value = name === 'auto' ? 'auto' : S.instructors.find(i => i.id === name)?.id
+  if (!value) { toast(`unknown instructor ${name}`); return false }
+  try {
+    await api('/api/instructor', { method:'POST', body:JSON.stringify({ instructor:value }) })
+    S.session.instructor = value
+    localStorage.setItem('relay.instructor', value)
+    $('#instructorSel').value = value
+    toast(`instructor: ${value}`)
+    return true
+  } catch (e) { toast(e.message); return false }
+}
+
+async function createSession() {
+  const d = await api('/api/session', { method:'POST' })
+  S.session = d.session
+  await boot()
+  toast(S.busy ? 'new session — the active run continues in the background' : 'new session')
+}
+async function loadSession(id) {
+  const d = await api('/api/session/' + id, { method:'POST' })
+  S.session = d.session
+  await boot()
+  toast(S.busy ? 'session loaded — the active run continues in the background' : 'session loaded')
+}
+async function deleteSession(id, title = '') {
+  if (!id || id === S.session?.id) { toast('switch sessions before deleting the active one'); return }
+  if (S.runningSessionIds.includes(id)) { toast('that session has an active run — stop it before deleting'); return }
+  if (!confirm(`Delete "${title || id}" (${id})? This removes its history and logs permanently.`)) return
+  try {
+    await api('/api/session/' + encodeURIComponent(id), { method:'DELETE' })
+    toast('session deleted')
+    await refresh()
+    if (!$('#modal').hidden) await showSessions()
+  } catch (e) { toast(e.message) }
+}
+async function stopRun() {
+  try { await api('/api/stop', { method:'POST' }); toast(S.busy || S.btwBusy ? 'stopping…' : 'stop sent') }
+  catch (e) { toast(e.message) }
+}
+function exportSession() {
+  const blob = new Blob([JSON.stringify(S.session, null, 2)], { type:'application/json' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `relay-${S.session.id}.json`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+async function runCommand(name, args) {
+  if (name === 'clear') name = 'new'
+  switch (name) {
+    case 'help': showHelp(); return true
+    case 'new': await createSession(); return true
+    case 'rename': {
+      const title = args || prompt('Session title:', S.session.title || '')
+      if (!title?.trim()) return false
+      await api('/api/rename', { method:'POST', body:JSON.stringify({ title:title.trim() }) })
+      await refresh(); toast('renamed'); return true
+    }
+    case 'models': showAllModels(); return true
+    case 'model': {
+      if (!args) { renderModelPop(); return true }
+      if (args.toLowerCase() === 'auto') return setModel('', '', false)
+      const found = findModel(args)
+      if (!found) { toast(`unknown model ${args}`); return false }
+      return setModel(found.model, found.agent)
+    }
+    case 'mode': {
+      if (!args) { toast(`mode: ${S.mode} · use /mode plan|code|orchestrate`); return true }
+      return setMode(args.toLowerCase())
+    }
+    case 'connect': await showConnect(); return true
+    case 'mcp': case 'plugins': await showMcp(); return true
+    case 'status': await showStatus(); return true
+    case 'quota': await showQuota(); return true
+    case 'btw': {
+      if (!args) { toast('usage: /btw <question or objective>'); return false }
+      const d = await api('/api/btw', { method:'POST', body:JSON.stringify({ text:args }) })
+      S.session.notes = d.notes || []
+      renderPinned()
+      toast(d.agent ? `btw sent — ${d.agent} is answering (note saved)` : 'btw sent (note saved)')
+      return true
+    }
+    case 'sessions': await showSessions(); return true
+    case 'agents': showAgents(); return true
+    case 'instructor': {
+      if (!args) {
+        showModal('instructor', S.instructors.map(i => `<button class="cmd-item" data-pick-instructor="${esc(i.id)}"><b>${esc(i.id)}</b><span>${esc(i.label)}</span></button>`).join('') +
+          '<button class="cmd-item" data-pick-instructor="auto"><b>auto</b><span>try each instructor in order</span></button>')
+        return true
+      }
+      return await setInstructor(args)
+    }
+    case 'cwd': {
+      if (!args) { toast('usage: /cwd <path>'); return false }
+      const d = await api('/api/cwd', { method:'POST', body:JSON.stringify({ cwd:args }) })
+      S.session.cwd = d.cwd; $('#cwd').value = d.cwd; toast('cwd updated'); return true
+    }
+    case 'export': exportSession(); return true
+    case 'stop': await stopRun(); return true
+    default:
+      toast(`unknown command /${name}`)
+      showHelp()
+      return false
+  }
+}
+
+function setSlashIndex(i) {
+  if (!S.slashMatches.length) return
+  S.slashIndex = (i + S.slashMatches.length) % S.slashMatches.length
+  document.querySelectorAll('#slashMenu .slash-item').forEach((el, idx) => el.classList.toggle('on', idx === S.slashIndex))
+}
+function updateSlashMenu() {
+  const menu = $('#slashMenu')
+  const m = $('#input').value.match(/^\/([a-z0-9-]*)$/i)
+  if (!m) { menu.hidden = true; S.slashMatches = []; return }
+  const q = m[1].toLowerCase()
+  const matches = COMMANDS.filter(c => c.name.startsWith(q))
+  if (!matches.length) { menu.hidden = true; S.slashMatches = []; return }
+  S.slashMatches = matches
+  S.slashIndex = 0
+  menu.innerHTML = matches.map((c, i) =>
+    `<button type="button" class="slash-item ${i === S.slashIndex ? 'on' : ''}" data-slash="${esc(c.name)}"><b>/${esc(c.name)}${c.args ? ' ' + esc(c.args) : ''}</b><span>${esc(c.desc)}</span></button>`).join('') +
+    '<div class="slash-more">Enter accepts · ↑↓ moves · Esc closes</div>'
+  menu.hidden = false
+}
+function acceptSlash(name) {
+  const cmd = COMMANDS.find(c => c.name === name)
+  if (!cmd) return
+  $('#input').value = '/' + name + (cmd.args ? ' ' : '')
+  $('#slashMenu').hidden = true
+  S.slashMatches = []
+  $('#input').focus()
+  syncSend()
+}
+
+$('#modalClose').onclick = closeModal
+$('#modal').addEventListener('input', (e) => {
+  if (e.target.id !== 'connSearch') return
+  S.connectQuery = e.target.value
+  renderProviderGrid()
+})
+$('#modal').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return
+  if (e.target.id === 'connKey') {
+    e.preventDefault()
+    $('[data-conn-save]')?.click()
+  } else if (e.target.id === 'connSearch') {
+    const first = $('#connGrid [data-conn-pick]')
+    if (first) { e.preventDefault(); first.click() }
+  }
+})
+$('#modal').addEventListener('click', async (e) => {
+  if (e.target === $('#modal')) return closeModal()
+  const model = e.target.closest('[data-pick-model]')
+  if (model) { closeModal(); setModel(model.dataset.pickModel ?? '', model.dataset.modelAgent || ''); return }
+  const del = e.target.closest('[data-del-session]')
+  if (del) { await deleteSession(del.dataset.delSession, del.dataset.sessionTitle); return }
+  const sess = e.target.closest('[data-pick-session]')
+  if (sess) { closeModal(); await loadSession(sess.dataset.pickSession); return }
+  const inst = e.target.closest('[data-pick-instructor]')
+  if (inst) { closeModal(); await setInstructor(inst.dataset.pickInstructor); return }
+
+  const connPick = e.target.closest('[data-conn-pick]')
+  if (connPick) {
+    S.connectPick = connPick.dataset.connPick
+    S.connectEdit = ''; S.connectCustom = ''
+    renderConnect()
+    return
+  }
+  const connCustom = e.target.closest('[data-conn-custom]')
+  if (connCustom) {
+    S.connectPick = ''; S.connectEdit = ''; S.connectCustom = connCustom.dataset.connCustom
+    renderConnect()
+    return
+  }
+  const connBack = e.target.closest('[data-conn-back]')
+  if (connBack) {
+    S.connectPick = ''; S.connectEdit = ''; S.connectCustom = ''; S.connectQuery = ''
+    renderConnect()
+    return
+  }
+  const connSave = e.target.closest('[data-conn-save]')
+  if (connSave) {
+    const editing = S.connectEdit || ''
+    const existing = editing ? S.connections.find(c => c.id === editing) : null
+    const provider = S.connectPick ? S.providers.find(p => p.id === S.connectPick) : null
+    const existingProviderId = existing?.providerId && S.providers.some(p => p.id === existing.providerId) ? existing.providerId : ''
+    const key = $('#connKey')?.value.trim() || ''
+    if (!editing && !key) { toast('paste an API key'); $('#connKey')?.focus(); return }
+    const payload = {
+      id: editing || undefined,
+      providerId: provider ? provider.id : existingProviderId,
+      name: $('#connName')?.value.trim() || undefined,
+      protocol: $('#connProtocol')?.value || undefined,
+      baseUrl: $('#connBase')?.value.trim() || undefined,
+      apiKey: key,
+      models: $('#connModels')?.value || undefined,
+    }
+    try {
+      const d = await api('/api/connections', { method:'POST', body:JSON.stringify(payload) })
+      S.connections = d.connections || []
+      const label = provider?.name || payload.name || (editing ? 'API' : 'Custom API')
+      await refresh()
+      await showConnect()
+      toast(`${label} ${editing ? 'updated' : 'connected'}`)
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const connEdit = e.target.closest('[data-conn-edit]')
+  if (connEdit) {
+    const c = S.connections.find(x => x.id === connEdit.dataset.connEdit)
+    if (!c) return
+    S.connectEdit = c.id
+    S.connectPick = c.providerId || ''
+    S.connectCustom = c.providerId ? '' : c.protocol
+    S.connectQuery = ''
+    renderConnect()
+    return
+  }
+  const connDel = e.target.closest('[data-conn-del]')
+  if (connDel) {
+    try {
+      await api('/api/connections/' + encodeURIComponent(connDel.dataset.connDel), { method:'DELETE' })
+      await refresh(); await showConnect(); toast('connection removed')
+    } catch (err) { toast(err.message) }
+    return
+  }
+
+  const mcpSave = e.target.closest('[data-mcp-save]')
+  if (mcpSave) {
+    try {
+      await api('/api/mcp', { method:'POST', body:JSON.stringify({
+        name: $('#mcpName').value, command: $('#mcpCommand').value, args: $('#mcpArgs').value,
+        env: $('#mcpEnv').value, agents: $('#mcpAgents').value, note: $('#mcpNote').value,
+      }) })
+      await refresh(); await showMcp(); toast('MCP server added')
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const mcpToggle = e.target.closest('[data-mcp-toggle]')
+  if (mcpToggle) {
+    try {
+      await api('/api/mcp/' + encodeURIComponent(mcpToggle.dataset.mcpToggle), { method:'POST', body:JSON.stringify({ enabled: mcpToggle.dataset.enabled !== '1' }) })
+      await refresh(); await showMcp(); toast('MCP updated')
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const mcpDel = e.target.closest('[data-mcp-del]')
+  if (mcpDel) {
+    try {
+      await api('/api/mcp/' + encodeURIComponent(mcpDel.dataset.mcpDel), { method:'DELETE' })
+      await refresh(); await showMcp(); toast('MCP removed')
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const pluginSave = e.target.closest('[data-plugin-save]')
+  if (pluginSave) {
+    try {
+      await api('/api/plugins', { method:'POST', body:JSON.stringify({
+        name: $('#pluginName').value, instructions: $('#pluginInstructions').value, agents: $('#pluginAgents').value,
+      }) })
+      await refresh(); await showMcp(); toast('plugin added')
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const pluginToggle = e.target.closest('[data-plugin-toggle]')
+  if (pluginToggle) {
+    try {
+      await api('/api/plugins/' + encodeURIComponent(pluginToggle.dataset.pluginToggle), { method:'POST', body:JSON.stringify({ enabled: pluginToggle.dataset.enabled !== '1' }) })
+      await refresh(); await showMcp(); toast('plugin updated')
+    } catch (err) { toast(err.message) }
+    return
+  }
+  const pluginDel = e.target.closest('[data-plugin-del]')
+  if (pluginDel) {
+    try {
+      await api('/api/plugins/' + encodeURIComponent(pluginDel.dataset.pluginDel), { method:'DELETE' })
+      await refresh(); await showMcp(); toast('plugin removed')
+    } catch (err) { toast(err.message) }
+  }
+})
+
+$('#slashMenu').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-slash]')
+  if (b) acceptSlash(b.dataset.slash)
+})
+$('#modelList').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pick-model]')
+  if (b) setModel(b.dataset.pickModel ?? '', b.dataset.modelAgent || '')
+})
+$('#modelBtn').onclick = (e) => {
+  e.stopPropagation()
+  if ($('#modelPop').hidden) renderModelPop()
+  else $('#modelPop').hidden = true
+}
+$('#allModels').onclick = () => { $('#modelPop').hidden = true; showAllModels() }
+$('#openConnect').onclick = showConnect
+$('#openMcp').onclick = showMcp
+$('#quota').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-quota-set]')
+  if (!b) return
+  const a = (S.quota?.agents || []).find(x => x.id === b.dataset.quotaSet)
+  if (!a) return
+  const answer = prompt(`Local call cap for ${a.label || a.id} (${a.window || 'day'}):`, String(a.limit || 100))
+  if (answer === null) return
+  const limit = Number(answer)
+  if (!Number.isFinite(limit) || limit < 0) { toast('cap must be 0 or more'); return }
+  try {
+    const d = await api('/api/quota/config', { method:'POST', body:JSON.stringify({ agent:a.id, limit, window:a.window || 'day' }) })
+    S.quota = d.quota || S.quota
+    renderQuota(); toast(`${a.label || a.id} cap set to ${limit || 'unmetered'}`)
+  } catch (err) { toast(err.message) }
+})
+$('#instructorSel').onchange = () => setInstructor($('#instructorSel').value)
+$('#input').addEventListener('input', () => { updateSlashMenu(); syncSend() })
+$('#input').addEventListener('keydown', (e) => {
+  const menuOpen = !$('#slashMenu').hidden && S.slashMatches.length
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); send(); return }
+  if (menuOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+    e.preventDefault(); setSlashIndex(S.slashIndex + (e.key === 'ArrowDown' ? 1 : -1)); return
+  }
+  if (menuOpen && (e.key === 'Enter' || e.key === 'Tab')) {
+    e.preventDefault(); acceptSlash(S.slashMatches[S.slashIndex]?.name); return
+  }
+  if (e.key === 'Escape' && menuOpen) { e.preventDefault(); $('#slashMenu').hidden = true; return }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+})
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return
+  if (S.busy || S.btwBusy) { e.preventDefault(); stopRun(); if (!$('#modal').hidden) closeModal(); return }
+  if (!$('#modal').hidden) { closeModal(); return }
+  if (!$('#slashMenu').hidden) $('#slashMenu').hidden = true
+  $('#modelPop').hidden = true
+})
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#composer')) { $('#slashMenu').hidden = true; $('#modelPop').hidden = true }
+})
+document.addEventListener('toggle', (e) => {
+  const d = e.target.closest?.('details[data-thinking]')
+  if (!d) return
+  if (d.open) S.openThinking.add(d.dataset.thinking)
+  else S.openThinking.delete(d.dataset.thinking)
+}, true)
+
+let es = null
+function connect() {
+  es?.close()
+  es = new EventSource('/api/events')
+  es.onmessage = (e) => {
+    const ev = JSON.parse(e.data)
+    if (ev.type === 'hello') {
+      S.session = ev.session; S.busy = ev.busy
+      S.runningSessionIds = ev.runningSessionIds || []
+      S.btwRuns = ev.btwRuns || 0
+      renderAll(); refreshQuota(); return
+    }
+    if (ev.sessionId && S.session && ev.sessionId !== S.session.id) return
+    if (ev.type === 'message') {
+      S.session.messages.push(ev.message)
+      renderThread(); renderPinned(); scrollDown()
+      if (ev.message.role === 'step' && document.hidden) notify(ev.message.label || ev.message.agent)
+    }
+    if (ev.type === 'message.update') {
+      const i = S.session.messages.findIndex(m => m.id === ev.message.id)
+      if (i >= 0) S.session.messages[i] = ev.message
+      renderThread(); renderPinned(); scrollDown()
+      if (ev.message.status !== 'running' && document.hidden) notify(ev.message.label || ev.message.agent)
+    }
+    if (ev.type === 'delta') {
+      const msg = S.session.messages.find(m => m.id === ev.id)
+      if (msg) msg.text = ev.text
+      const pre = document.querySelector(`pre[data-out="${CSS.escape(ev.id)}"]`)
+      if (pre) {
+        const live = splitReasoning(ev.text)
+        pre.textContent = live.output || (live.thinking ? '' : ev.text)
+        scrollDown()
+      }
+    }
+    if (ev.type === 'agent') setAgentState(ev.agent, ev.state)
+    if (ev.type === 'quota') { S.quota = ev.quota; renderQuota() }
+    if (ev.type === 'busy') {
+      S.busy = ev.busy
+      S.runningSessionIds = ev.runningSessionIds || []
+      S.btwRuns = ev.btwRuns || 0
+      renderBusy()
+      renderSessions(S.sessions)
+      syncSend()
+    }
+    if (ev.type === 'notice') toast(ev.text)
+  }
+  es.onerror = () => { es.close(); setTimeout(connect, 2000) }
+}
+function notify(who) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return
+  new Notification('relay', { body: `${who} finished` })
+}
+
+$('#thread').addEventListener('click', async (e) => {
+  const starter = e.target.closest('[data-starter]')
+  if (starter) { $('#input').value = starter.dataset.starter; $('#input').focus(); syncSend(); return }
+  const run = e.target.closest('[data-run-plan]')
+  if (run) {
+    const id = run.dataset.runPlan
+    const msg = S.session.messages.find(m => m.id === id)
+    try { await api('/api/run', { method:'POST', body: JSON.stringify({ steps: planStepsFromDom(id), task: msg.task, model: msg.model }) }) }
+    catch (err) { toast(err.message) }
+    return
+  }
+  const copy = e.target.closest('[data-copy]')
+  if (copy) {
+    const m = S.session.messages.find(x => x.id === copy.dataset.copy)
+    await navigator.clipboard.writeText(m?.text || ''); toast('copied'); return
+  }
+  const pin = e.target.closest('[data-pin]')
+  if (pin) {
+    const id = pin.dataset.pin
+    const on = !(S.session.pinned || []).some(p => p.stepId === id)
+    const d = await api('/api/pin', { method:'POST', body: JSON.stringify({ stepId:id, on }) })
+    S.session.pinned = d.pinned; renderPinned(); toast(on ? 'pinned' : 'unpinned')
+  }
+})
+$('#thread').addEventListener('change', (e) => {
+  const sel = e.target.closest('[data-plan-agent]')
+  if (!sel) return
+  const slot = sel.closest('.plan-pick')?.querySelector('[data-model-slot]')
+  const msg = S.session.messages.find(m => m.id === sel.dataset.planAgent)
+  if (slot) slot.innerHTML = modelPicker(sel.dataset.planAgent, sel.dataset.i, sel.value, msg?.model || '')
+})
+$('#sessions').addEventListener('click', async (e) => {
+  const del = e.target.closest('[data-del-session]')
+  if (del) { await deleteSession(del.dataset.delSession, del.dataset.sessionTitle); return }
+  const b = e.target.closest('[data-session]'); if (!b) return
+  try { await loadSession(b.dataset.session) } catch (err) { toast(err.message) }
+})
+$('#newSession').onclick = async () => {
+  try { await createSession() } catch (err) { toast(err.message) }
+}
+$('#cwd').onchange = async () => {
+  try { await api('/api/cwd', { method:'POST', body: JSON.stringify({ cwd: $('#cwd').value }) }); toast('cwd updated') }
+  catch (e) { toast(e.message) }
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => setMode(t.dataset.mode))
+$('#stop').onclick = stopRun
+
+async function send() {
+  const text = $('#input').value.trim()
+  if (!text) return
+  $('#slashMenu').hidden = true
+  const cmd = parseSlash(text)
+  if (cmd) {
+    try {
+      const handled = await runCommand(cmd.name, cmd.args)
+      if (handled) {
+        $('#input').value = ''
+        updateSlashMenu(); syncSend()
+      }
+    } catch (e) { toast(e.message) }
+    return
+  }
+  if (S.busy) {
+    const elsewhere = S.runningSessionIds.length && !S.runningSessionIds.includes(S.session?.id)
+    toast(elsewhere ? 'a run is active in another session — wait or press Esc to stop it' : 'run is active — press Esc to stop it')
+    return
+  }
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission().catch(()=>{})
+  const model = S.model || undefined
+  const modelAgent = S.modelAgent || undefined
+  trackModel(S.model, S.modelAgent)
+  try {
+    if (S.mode === 'plan') {
+      await api('/api/plan', { method:'POST', body: JSON.stringify({ text, mode:'plan', auto:false, model, modelAgent, instructor: $('#instructorSel').value || undefined }) })
+    } else if (S.mode === 'orchestrate') {
+      await api('/api/orchestrate', { method:'POST', body: JSON.stringify({ text, model, modelAgent }) })
+    } else {
+      await api('/api/plan', { method:'POST', body: JSON.stringify({ text, mode:'code', auto:true, model, modelAgent, instructor: $('#instructorSel').value || undefined }) })
+    }
+    $('#input').value = ''
+    updateSlashMenu(); syncSend()
+  } catch (e) { toast(e.message) }
+}
+$('#send').onclick = send
+setMode(S.mode, true)
+setInterval(refreshQuota, 15000)
+boot().catch(e => toast(e.message))
+</script>
+</body>
+</html>

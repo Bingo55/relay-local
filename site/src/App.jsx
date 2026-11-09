@@ -18,7 +18,7 @@ function Nav() {
           <a href="#how-it-works" onClick={() => setOpen(false)}>How it works</a>
           <a href="#security" onClick={() => setOpen(false)}>Security</a>
           <a href="#faq" onClick={() => setOpen(false)}>FAQ</a>
-          <a className="github-link" href="https://github.com/Nepoleon/relay-local" target="_blank" rel="noreferrer">GitHub</a>
+          <a className="github-link" href="https://github.com/Bingo55/relay-local" target="_blank" rel="noreferrer">GitHub</a>
           <a className="button button-dark" href="#install" onClick={() => setOpen(false)}>Install</a>
         </nav>
       </div>
@@ -194,7 +194,7 @@ relay agents                  # list assistants and roles`}</code></pre>
           <div className="container faq"><SectionHeading number="11 / FAQ" title="Questions worth asking." />{FAQS.map((item) => <details key={item.question}><summary>{item.question}<span>+</span></summary><p>{item.answer}</p></details>)}</div>
         </section>
       </main>
-      <footer className="site-footer"><div className="container footer-grid"><div><Mark /><p>Local-first agent orchestration.<br />Your keys, your models, your project folder.</p></div><div><h3>Sections</h3><a href="#product">Product</a><a href="#how-it-works">How it works</a><a href="#security">Security</a><a href="#faq">FAQ</a></div><div><h3>Source</h3><a href="https://github.com/Nepoleon/relay-local">GitHub repository</a><span>MIT license</span><span>Security policy</span></div></div><div className="container footer-bottom"><span>© 2026 Relay · MIT</span><span>Built for a local machine.</span></div></footer>
+      <footer className="site-footer"><div className="container footer-grid"><div><Mark /><p>Local-first agent orchestration.<br />Your keys, your models, your project folder.</p></div><div><h3>Sections</h3><a href="#product">Product</a><a href="#how-it-works">How it works</a><a href="#security">Security</a><a href="#faq">FAQ</a></div><div><h3>Source</h3><a href="https://github.com/Bingo55/relay-local">GitHub repository</a><span>MIT license</span><span>Security policy</span></div></div><div className="container footer-bottom"><span>© 2026 Relay · MIT</span><span>Built for a local machine.</span></div></footer>
     </div>
   )
 }

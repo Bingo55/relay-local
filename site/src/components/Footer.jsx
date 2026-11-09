@@ -90,7 +90,7 @@ export default function Footer() {
                 Source
               </h3>
               <a
-                href="https://github.com/Nepoleon/relay-local"
+                href="https://github.com/Bingo55/relay-local"
                 target="_blank"
                 rel="noreferrer"
                 className="mt-4 inline-block text-[13px] leading-[1.7] text-cream/80 hover:text-cream"

@@ -1,6 +1,6 @@
 # Relay
 
-[![ci](https://github.com/Nepoleon/relay-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Nepoleon/relay-local/actions/workflows/ci.yml)
+[![ci](https://github.com/Bingo55/relay-local/actions/workflows/ci.yml/badge.svg)](https://github.com/Bingo55/relay-local/actions/workflows/ci.yml)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Relay is a local-first control room for CLI coding agents and API models. Plan a
@@ -61,7 +61,7 @@ choose to connect.
 ## Install from source
 
 ```bash
-git clone https://github.com/Nepoleon/relay-local.git
+git clone https://github.com/Bingo55/relay-local.git
 cd relay-local
 npm install
 npm run build

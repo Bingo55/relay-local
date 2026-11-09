@@ -26,7 +26,7 @@ export const FAQS = [
   { question: 'Does it work on macOS and Linux?', answer: 'Node 24 is the requirement. Windows is the primary development platform; CI covers CLI tests on Windows and Ubuntu.' },
 ]
 
-export const INSTALL_COMMANDS = `git clone https://github.com/Nepoleon/relay-local.git
+export const INSTALL_COMMANDS = `git clone https://github.com/Bingo55/relay-local.git
 cd relay-local
 npm install
 npm start

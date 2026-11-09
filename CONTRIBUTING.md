@@ -13,7 +13,7 @@ Requirements:
 - At least one supported agent CLI, if you want to exercise a real run
 
 ```bash
-git clone https://github.com/Nepoleon/relay-local.git
+git clone https://github.com/Bingo55/relay-local.git
 cd relay-local
 npm install
 npm start

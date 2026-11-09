@@ -8,11 +8,11 @@
   "author": "Relay contributors",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Nepoleon/relay-local.git"
+    "url": "git+https://github.com/Bingo55/relay-local.git"
   },
-  "homepage": "https://github.com/Nepoleon/relay-local#readme",
+  "homepage": "https://github.com/Bingo55/relay-local#readme",
   "bugs": {
-    "url": "https://github.com/Nepoleon/relay-local/issues"
+    "url": "https://github.com/Bingo55/relay-local/issues"
   },
   "keywords": [
     "ai",

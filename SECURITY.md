@@ -8,7 +8,7 @@ shared or public service.
 Please do not open a public issue for a security problem. Use GitHub's private
 vulnerability reporting:
 
-https://github.com/Nepoleon/relay-local/security/advisories/new
+https://github.com/Bingo55/relay-local/security/advisories/new
 
 Include the version, the operating system, reproduction steps, and the impact
 you believe the issue has. I will acknowledge the report and coordinate a fix

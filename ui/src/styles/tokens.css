@@ -1,0 +1,32 @@
+:root {
+  color-scheme: dark;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --color-error: #ff7b72; --color-success: #56d364;
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 350; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+  --color-paper: #0b0b0c; --color-paper-2: #1a1a1b; --color-paper-3: #282829;
+  --color-ink: #e7e7e7; --color-ink-2: #bfbfbf; --color-muted: #909091;
+  --color-rule: #373738; --color-rule-2: #565656;
+  --color-accent: #d92d20; --color-accent-ink: #ffffff; --color-accent-2: #b6261b; --color-accent-text: #e46c63; --color-accent-soft: #341210; --color-focus: #e46c63;
+  --color-cotton: #1a1a1b; --color-desk: #1a1a1b; --color-print: #e7e7e7;
+  --color-board: #e7e7e7; --color-board-type: #0b0b0c; --color-paid: #e46c63;
+  --shade-rgb: 0 0 0; --lit-rgb: 255 255 255; --deep-rgb: 0 0 0;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif; --font-body: var(--font-display);
+  --font-outlier: "JetBrains Mono", ui-monospace, monospace;
+  --radius-small: 4px;
+  --rail-width: 280px; --inspector-width: 320px; --message-width: 728px; --header-height: 52px;
+  --space-control: 20px; --space-comfort: 32px; --space-dock: 48px;
+  --color-overlay: rgb(0 0 0 / 0.72);
+  --radius-card: 8px; --radius-input: 6px; --radius-pill: 999px; --radius-stock: 8px; --rule-hair: 1px;
+  --shadow-card: 0 1px 2px rgb(var(--shade-rgb) / 0.32);
+  --edge-stock: inset 0 1px 0 rgb(var(--lit-rgb) / 0.16), inset 0 -1px 0 rgb(var(--shade-rgb) / 0.32), 0 0 0 0.5px rgb(var(--shade-rgb) / 0.5), 0 1px 0 rgb(var(--shade-rgb) / 0.32);
+  --cast-stock: 6px 5px 10px -6px rgb(var(--shade-rgb) / 0.55); --cast-stock-lift: 12px 10px 18px -8px rgb(var(--shade-rgb) / 0.55);
+  --press-groove: inset 1px 1.5px 2px rgb(var(--shade-rgb) / 0.4), inset -1px -1px 0 rgb(var(--lit-rgb) / 0.16), 0 0 0 0.5px rgb(var(--shade-rgb) / 0.42);
+  --tracking-display: -0.03em; --display-weight: 600;
+}
+@font-face { font-family: "Inter"; src: url('/fonts/inter.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url('/fonts/jetbrains-mono.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; }

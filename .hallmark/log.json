@@ -1,0 +1,107 @@
+[
+ {
+  "date": "2026-11-05",
+  "mode": "redesign",
+  "depth": "polish",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "Ink & Red",
+  "axes": [
+   "dark",
+   "grotesk-sans",
+   "restrained"
+  ],
+  "prompt": "Change the Relay workspace default to black and red, with independent background and button/accent theme colours and solid, outline or transparent button treatments, without changing layout or the frozen local API.",
+  "hero": "not applicable: app screen",
+  "nav": "conversation rail and compact header",
+  "footer": "docked composer",
+  "imagery": "none; real browser workspace with explicitly sample-only fixture captures",
+  "photos": [],
+  "entry": "local coding workspace",
+  "fingerprint": [
+   "history rail",
+   "bounded conversation",
+   "editable plan",
+   "docked composer",
+   "responsive inspector",
+   "near-black paper and red action"
+  ],
+  "sections": [
+   "history",
+   "conversation",
+   "plan",
+   "composer",
+   "inspector",
+   "appearance"
+  ],
+  "signature": "editable agent/model/prompt plan",
+  "waived": [
+   "39b: descriptive rows and whole-card appearance presets as touch targets"
+  ],
+  "review": {
+   "hero": "ship on the structural Coral direction; palette re-rendered and contrast-tested",
+   "floorFailures": 0,
+   "openReflex": 0,
+   "warnings49": "five judged action-plus-helper or already-nowrap labels"
+  },
+  "limits": [
+   "browser-only theme persistence; no OS window transparency",
+   "no preset-delete or side-note-remove API",
+   "no real-provider execution or process-tree stopping revalidation"
+  ]
+ },
+ {
+  "date": "2026-11-04",
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "Coral",
+  "deal": "1/3",
+  "seed": "relay-local-coding-agent-4571?2ccf9f19?2026-11-04?r0",
+  "axes": [
+   "light",
+   "grotesk-sans",
+   "warm",
+   "restrained"
+  ],
+  "hero": "not applicable: app screen",
+  "nav": "conversation rail and compact header",
+  "footer": "docked composer",
+  "imagery": "none; real browser workspace with explicitly sample-only fixture captures",
+  "photos": [],
+  "entry": "local coding workspace",
+  "fingerprint": [
+   "history rail",
+   "bounded conversation",
+   "editable plan",
+   "docked composer",
+   "responsive inspector",
+   "warm neutral surfaces"
+  ],
+  "sections": [
+   "history",
+   "conversation",
+   "plan",
+   "composer",
+   "inspector"
+  ],
+  "signature": "editable agent/model/prompt plan",
+  "waived": [
+   "39b: descriptive whole-row touch targets"
+  ],
+  "prompt": "Rebuild Relay browser UI using React19, strict TypeScript, shadcn, prompt-kit and Hallmark, retaining frozen local HTTP/SSE API and features.",
+  "review": {
+   "hero": "ship; late first-screen review",
+   "finish": "one modal-stacking finding resolved; subagent scoring confirmed",
+   "floorFailures": 0,
+   "openReflex": 0,
+   "warnings49": "five judged action-plus-helper or already-nowrap labels"
+  },
+  "limits": [
+   "no preset-delete or side-note-remove API",
+   "usage-ranked model picker not reproduced",
+   "no real-provider execution or process-tree stopping revalidation"
+  ]
+ }
+]

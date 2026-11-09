@@ -15,3 +15,7 @@ Thumbs.db
 .vscode/
 .idea/
 coverage/
+public/assets/
+public/fonts/
+ui/*.tsbuildinfo
+.hallmark/screens/

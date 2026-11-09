@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f0e6"/>
+  <path d="M72 72H1128M72 558H1128" stroke="#d3ccbc"/>
+  <text x="72" y="126" fill="#a8431c" font-family="monospace" font-size="18" letter-spacing="3">LOCAL-FIRST AGENT ORCHESTRATION</text>
+  <text x="72" y="300" fill="#12130f" font-family="Georgia, serif" font-size="112">Your agents.</text>
+  <text x="72" y="412" fill="#a8431c" font-family="Georgia, serif" font-size="112">One relay.</text>
+  <text x="72" y="520" fill="#6b6a60" font-family="monospace" font-size="18">127.0.0.1 · MIT · YOUR KEYS, YOUR MACHINE</text>
+</svg>

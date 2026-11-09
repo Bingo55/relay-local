@@ -1,8 +1,8 @@
 // Relay server: static UI, JSON API, SSE stream. Localhost only.
 import http from 'node:http'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import { dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { Store, Bus, rid } from './lib/store.mjs'
 import { makePlan, resolveAgent, readConfig, INSTRUCTOR, isCooling, orchestratePlan } from './lib/plan.mjs'
 import { runSteps } from './lib/execute.mjs'
@@ -223,14 +223,49 @@ function startBtw({ text, agent, mainTask, latest }, runSession = session) {
   })()
 }
 
+function serveStatic(req, res, root) {
+  const send = (code, data, headers = {}) => {
+    res.writeHead(code, { 'cache-control': 'no-store', ...headers })
+    res.end(data)
+    return true
+  }
+  // Check the decoded raw path before URL parsing can erase traversal segments.
+  const raw = req.url.split(/[?#]/, 1)[0]
+  let path
+  try { path = decodeURIComponent(raw) } catch {
+    return req.method === 'GET' && /^\/(?:assets|fonts)(?:[/\\%]|$)/.test(raw) ? send(400, 'Bad path') : false
+  }
+  const index = path === '/' || path === '/index.html'
+  if (!index && (req.method !== 'GET' || !/^\/(?:assets|fonts)(?:[/\\]|$)/.test(path))) return false
+  if (/[\\%\x00-\x1f\x7f:]|(?:^|\/)\.\.?(?:\/|$)|[. ](?:\/|$)/.test(path)) return send(400, 'Bad path')
+  const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.png': 'image/png' }
+  const type = index ? 'text/html; charset=utf-8' : types[extname(path)]
+  if (!type) return send(404, 'Not found')
+  try {
+    const base = resolve(root)
+    const file = resolve(base, `.${index ? '/index.html' : path}`)
+    const within = (dir, target) => {
+      const rel = relative(dir, target)
+      return rel && rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)
+    }
+    if (!within(base, file)) return send(403, 'Forbidden')
+    const real = realpathSync(file)
+    if (!within(realpathSync(base), real)) return send(403, 'Forbidden')
+    if (!statSync(real).isFile()) return send(404, 'Not found')
+    const data = readFileSync(real)
+    const hashed = !index && path.startsWith('/assets/') && /-[A-Za-z0-9_-]{8}\.[^./]+$/.test(path)
+    return send(200, data, { 'content-type': type, 'cache-control': hashed ? 'public, max-age=31536000, immutable' : 'no-store' })
+  } catch (e) {
+    if (index && e.code === 'ENOENT') return send(200, '<!doctype html><meta charset="utf-8"><title>Relay</title><p>Build the UI first: <code>npm run build</code></p>', { 'content-type': type })
+    return send(404, 'Not found')
+  }
+}
+
 const PORT = cfg.port || 7777
 const ALLOWED_HOSTS = new Set([`127.0.0.1:${PORT}`, `localhost:${PORT}`, `[::1]:${PORT}`])
 const ALLOWED_ORIGINS = new Set([...ALLOWED_HOSTS].map((host) => `http://${host}`))
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://127.0.0.1')
-  const path = url.pathname
-
   try {
     // Reject DNS-rebinding attempts and cross-site writes. The UI and terminal
     // client both talk to loopback; anything else is not a legitimate caller.
@@ -249,10 +284,9 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    if (path === '/' || path === '/index.html') {
-      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
-      return res.end(readFileSync(join(here, 'public', 'index.html')))
-    }
+    if (serveStatic(req, res, join(here, 'public'))) return
+    const url = new URL(req.url, 'http://127.0.0.1')
+    const path = url.pathname
 
     if (path === '/favicon.ico') { res.writeHead(204); return res.end() }
 

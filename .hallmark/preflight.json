@@ -1,0 +1,12 @@
+{
+  "scanned": "2026-11-04",
+  "findings": {
+    "fonts": "site/public/fonts/: self-hosted Inter and JetBrains Mono",
+    "palette": "site/src/styles/index.css:5 warm paper and rust; site work is uncommitted and out of scope",
+    "motion": "No motion library needed for the app; state-only motion",
+    "spacing": "New token scale; 728px message column, 280px rail, 320px inspector",
+    "framework": "Vanilla public/index.html; site/package.json uses Vite and Tailwind 3"
+  },
+  "preserve": ["HTTP/SSE API", "loopback security", "fonts", "Tailwind 3", "site work"],
+  "introduce": ["React 19", "strict TypeScript", "prompt-kit", "Coral app surfaces", "static serving tests"]
+}

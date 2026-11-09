@@ -23,8 +23,8 @@
       name="description"
       content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
     />
-    <meta name="theme-color" content="#07080A" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#F4F0E6" />
+    <meta name="color-scheme" content="light" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
 
     <link rel="canonical" href="https://nepoleon.github.io/relay-local/" />
@@ -37,11 +37,11 @@
       content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
     />
     <meta property="og:url" content="https://nepoleon.github.io/relay-local/" />
-    <meta property="og:image" content="https://nepoleon.github.io/relay-local/images/og-cover.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image" content="https://nepoleon.github.io/relay-local/og-card.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Long-exposure light trails on a city road at night." />
+    <meta property="og:image:alt" content="Relay — local-first agent orchestration." />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Relay — Local-first agent orchestration" />
@@ -49,8 +49,8 @@
       name="twitter:description"
       content="Plan, route, and run your coding agents from one local workspace. Bring your own keys, models, and project folder."
     />
-    <meta name="twitter:image" content="https://nepoleon.github.io/relay-local/images/og-cover.jpg" />
-    <meta name="twitter:image:alt" content="Long-exposure light trails on a city road at night." />
+    <meta name="twitter:image" content="https://nepoleon.github.io/relay-local/og-card.svg" />
+    <meta name="twitter:image:alt" content="Relay — local-first agent orchestration." />
 
     <style>
       @font-face {
@@ -86,17 +86,17 @@
     <link rel="preload" href="%BASE_URL%fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="%BASE_URL%fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
 
-    <link
-      rel="preload"
-      as="image"
-      type="image/avif"
-      href="%BASE_URL%images/hero-workspace-1200.avif"
-      imagesrcset="%BASE_URL%images/hero-workspace-800.avif 800w, %BASE_URL%images/hero-workspace-1200.avif 1200w, %BASE_URL%images/hero-workspace-1600.avif 1600w"
-      imagesizes="100vw"
-    />
   </head>
   <body>
+    <a href="#main" class="skip-link">Skip to content</a>
     <div id="root"></div>
+    <noscript>
+      <main id="main" style="max-width: 760px; margin: 4rem auto; padding: 0 1rem; font-family: sans-serif;">
+        <h1>Your agents. One relay.</h1>
+        <p>Relay routes coding-agent work into one local workspace on 127.0.0.1.</p>
+        <p>Enable JavaScript for the full product page, or visit the <a href="https://github.com/Nepoleon/relay-local">source repository</a>.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
